@@ -1,0 +1,2040 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Aplikasi Pembuat Surat Sekolah</title>
+<!-- Google Fonts: Poppins -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- Font Awesome for Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+<!-- jsPDF and html2canvas for Backup Feature -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<style>
+  :root {
+    --primary-dark: #0a4d2f;
+    --primary: #0b5a3a;
+    --primary-light: #7fc49b;
+    --secondary: #f0f9f4;
+    --background: #eef7f1;
+    --surface: #ffffff;
+    --text-primary: #212121;
+    --text-secondary: #555555;
+    --text-muted: #888888;
+    --error: #d32f2f;
+    --border: #e0e0e0;
+    --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    --shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.12);
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: "Poppins", sans-serif;
+    background-color: var(--background);
+    color: var(--text-primary);
+    line-height: 1.6;
+  }
+
+  .app {
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: 380px;
+    background: linear-gradient(180deg, var(--primary-dark), var(--primary));
+    color: var(--surface);
+    padding: 25px;
+    overflow-y: auto;
+    box-shadow: var(--shadow);
+  }
+
+  .brand {
+    font-weight: 700;
+    font-size: 20px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .sidebar p.sub {
+    opacity: 0.9;
+    font-size: 13px;
+    margin-bottom: 25px;
+  }
+
+  .menu {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 25px;
+  }
+
+  .menu .section-title {
+    font-size: 13px;
+    font-weight: 600;
+    opacity: 0.9;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  select, input, textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 14px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    background-color: var(--surface);
+    color: var(--text-primary);
+  }
+
+  select:focus, input:focus, textarea:focus {
+    outline: none;
+    border-color: var(--primary-light);
+    box-shadow: 0 0 0 3px rgba(127, 196, 155, 0.2);
+  }
+  
+  .form-group {
+    margin-bottom: 15px;
+  }
+  .form-group label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 5px;
+    font-size: 13px;
+  }
+  .form-group .error-message {
+    color: var(--error);
+    font-size: 12px;
+    margin-top: 4px;
+    display: none;
+  }
+  .form-group.has-error input,
+  .form-group.has-error textarea,
+  .form-group.has-error select {
+    border-color: var(--error);
+  }
+  .form-group.has-error .error-message {
+    display: block;
+  }
+
+  /* CONTENT */
+  .content {
+    flex: 1;
+    padding: 30px;
+    overflow-y: auto;
+  }
+
+  .panel {
+    background: var(--surface);
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 60px);
+  }
+
+  .panel-header {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    background: var(--primary-light);
+    border-radius: 10px;
+    margin-bottom: 20px;
+    gap: 20px;
+  }
+  .panel h3 {
+    margin: 0;
+    color: var(--primary);
+    font-weight: 600;
+  }
+
+  .preview-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    padding: 10px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    border: 0;
+    font-weight: 500;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-prim {
+    background: var(--primary);
+    color: var(--surface);
+  }
+  .btn-prim:hover {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
+  }
+  
+  .btn-outline {
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--primary);
+    color: var(--primary);
+  }
+  .btn-outline:hover {
+    background-color: rgba(11, 90, 58, 0.1);
+    border-color: var(--primary-dark);
+    color: var(--primary-dark);
+  }
+  
+  .btn-danger {
+    background: var(--error);
+    color: var(--surface);
+  }
+  .btn-danger:hover {
+    background: #b71c1c;
+  }
+
+  /* Form Container */
+  .form-container {
+    background-color: var(--secondary);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    border: 1px solid var(--primary-light);
+  }
+  .hidden {
+    display: none;
+  }
+
+  /* Preview Container */
+  .preview-container {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  /* PREVIEW (kertas legal) */
+  .preview-wrap {
+    flex-grow: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .preview {
+    background: #fdfdf8;
+    width: 21.59cm;
+    min-height: 35.56cm;
+    margin: 0 auto 30px auto;
+    padding: 1.5cm 2.5cm 3cm 2.5cm;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    position: relative;
+    text-align: left;
+    page-break-after: always;
+  }
+
+  .preview::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-45deg);
+    font-size: 100px;
+    color: rgba(0, 0, 0, 0.05);
+    font-weight: 700;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+
+  .paper {
+    font-family: "Times New Roman", Times, serif;
+    font-size: 12pt;
+    line-height: 1; /* UBAH DARI 1.6 MENJADI 1 */
+    color: #000;
+    position: relative;
+    z-index: 1;
+  }
+
+  .letterhead {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #000;
+    padding-bottom: 15px;
+  }
+  .letterhead .logo-placeholder {
+    width: 70px;
+    height: 90px;
+    background: #ddd;
+    border-radius: 0%;
+    margin-right: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+    color: #777;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .letterhead .logo-placeholder img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .letterhead .letterhead-text {
+    flex: 1;
+    text-align: center;
+  }
+  .letterhead .letterhead-text p {
+    margin: 2px 0;
+    line-height: 1; /* UBAH MENJADI 1 */
+    font-weight: bold;
+  }
+  .letterhead h1 { margin: 0; font-size: 18px; font-weight: bold; }
+  .letterhead p { margin: 2px 0; font-size: 11px; line-height: 1; } /* TAMBAH line-height: 1 */
+
+  .paper .center { text-align: center; }
+  .paper .u { text-decoration: underline; }
+  .paper .indent { text-indent: 50px; }
+  .paper .justify { text-align: justify; }
+  
+  /* Styling untuk tabel tanpa garis */
+  .paper table.tanpa-garis {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 10px 0 20px 0;
+    border: none;
+  }
+  
+  .paper table.tanpa-garis th,
+  .paper table.tanpa-garis td {
+    border: none;
+    padding: 8px;
+    text-align: left;
+    vertical-align: top;
+    line-height: 1; /* TAMBAH line-height: 1 */
+  }
+  
+  /* Tabel 3 kolom tanpa garis untuk bagian menimbang dan mengingat */
+  .paper table.tiga-kolom {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 10px 0 20px 0;
+    border: none;
+  }
+  
+  .paper table.tiga-kolom td {
+    border: none;
+    padding: 5px 8px;
+    vertical-align: top;
+    line-height: 1; /* TAMBAH line-height: 1 */
+  }
+  
+  .paper table.tiga-kolom td:first-child {
+    width: 20%;
+    font-weight: bold;
+    white-space: nowrap;
+  }
+  
+  .paper table.tiga-kolom td:nth-child(2) {
+    width: 5%;
+    text-align: center;
+    white-space: nowrap;
+  }
+  
+  .paper table.tiga-kolom td:nth-child(3) {
+    width: 75%;
+    text-align: justify;
+  }
+  
+  /* Tabel dengan garis untuk Lampiran */
+  .paper table.dengan-garis {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 10px 0 20px 0;
+    border: 1px solid #000;
+  }
+  
+  .paper table.dengan-garis th,
+  .paper table.dengan-garis td {
+    border: 1px solid #000;
+    padding: 8px;
+    text-align: center;
+    line-height: 1; /* TAMBAH line-height: 1 */
+  }
+  
+  .paper table.dengan-garis th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+  }
+  
+  /* Logo Upload */
+  .logo-upload {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+  }
+  .logo-preview {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: #ddd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .logo-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .logo-upload-btn {
+    padding: 8px 15px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    color: white;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.3s;
+  }
+  .logo-upload-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  /* Responsive */
+  @media (max-width: 1200px) {
+    .sidebar { width: 320px; }
+    .preview { transform: scale(0.8); transform-origin: top center; margin-bottom: -20%; }
+  }
+  @media (max-width: 1000px) {
+    .app { flex-direction: column; }
+    .sidebar { width: 100%; }
+    .preview { transform: none; width: 100%; max-width: 500px; height: auto; margin: 0 auto; }
+  }
+
+  /* Tab Navigation */
+  .tab-navigation {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 20px;
+  }
+  
+  .tab-button {
+    padding: 10px 20px;
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    cursor: pointer;
+    font-weight: 500;
+    color: var(--text-secondary);
+    transition: all 0.3s;
+  }
+  
+  .tab-button.active {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+  }
+  
+  .tab-button:hover {
+    color: var(--primary);
+  }
+  
+  .tab-content {
+    display: none;
+  }
+  
+  .tab-content.active {
+    display: block;
+  }
+  
+  /* Dynamic Row Styles */
+  .dynamic-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  
+  .dynamic-row input {
+    flex: 1;
+  }
+  
+  .remove-row-btn {
+    background: var(--error);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .add-row-btn {
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 16px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 10px;
+  }
+
+  /* Right align untuk penandatanganan dan tempat tanggal */
+  .penandatanganan-kanan {
+    text-align: right;
+    margin-top: 120px;
+  }
+  
+  .tempat-tanggal-kanan {
+    text-align: right;
+    margin-top: 60px;
+    margin-bottom: 20px;
+  }
+  
+  .tempat-tanggal-kanan p {
+    margin: 5px 0;
+    line-height: 1; /* UBAH MENJADI 1 */
+  }
+
+  /* Select jenis surat styling */
+  #jenisSurat {
+    font-size: 14px;
+    font-weight: 500;
+    border: 2px solid var(--primary);
+    border-radius: 8px;
+    background-color: white;
+  }
+  
+  /* Panel header layout */
+  .panel-header > div:first-child {
+    flex: 1;
+    min-width: 300px;
+  }
+  
+  /* Styling untuk notification */
+  .notification {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: var(--primary);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    box-shadow: var(--shadow-hover);
+    z-index: 1000;
+    animation: slideIn 0.3s ease-out;
+  }
+  
+  @keyframes slideIn {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <aside class="sidebar">
+    <div class="menu">
+      <div class="section-title">Identitas Sekolah</div>
+      <div class="logo-upload">
+        <div class="logo-preview" id="logoPreview">
+          <i class="fas fa-school" style="color: #999;"></i>
+        </div>
+        <div>
+          <input type="file" id="logoInput" accept="image/*" style="display: none;" onchange="handleLogoUpload(event)">
+          <button type="button" class="logo-upload-btn" onclick="document.getElementById('logoInput').click()">
+            <i class="fas fa-upload"></i> Upload Logo
+          </button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="nama_sekolah">Nama Sekolah *</label>
+        <input id="nama_sekolah" type="text" oninput="updateAllPreviews()" required>
+        <span class="error-message">Nama sekolah harus diisi.</span>
+      </div>
+      <div class="form-group">
+        <label for="kecamatan">Kecamatan *</label>
+        <input id="kecamatan" type="text" oninput="updateAllPreviews()" required>
+        <span class="error-message">Kecamatan harus diisi.</span>
+      </div>
+      <div class="form-group">
+        <label for="yayasan">Yayasan</label>
+        <input id="yayasan" type="text" oninput="updateAllPreviews()">
+      </div>
+      <div class="form-group">
+        <label for="nama_kepala_sekolah">Nama Kepala Sekolah *</label>
+        <input id="nama_kepala_sekolah" type="text" oninput="updateAllPreviews()" required>
+        <span class="error-message">Nama kepala sekolah harus diisi.</span>
+      </div>
+      <div class="form-group">
+        <label for="tempat_ttd">Tempat Penandatanganan *</label>
+        <input id="tempat_ttd" type="text" value="Rajabasa Baru" oninput="updateAllPreviews()" required>
+        <span class="error-message">Tempat penandatanganan harus diisi.</span>
+      </div>
+      <button type="button" class="btn btn-prim" style="width: 100%; margin-top: 10px;" onclick="saveIdentitasSekolah()">
+        <i class="fas fa-save"></i> Simpan Identitas Sekolah
+      </button>
+    </div>
+  </aside>
+
+  <main class="content">
+    <div class="panel">
+      <div class="panel-header">
+        <div style="flex: 1;">
+          <select id="jenisSurat" onchange="handleJenisSuratChange()" style="width: 360px; padding: 10px;">
+            <option value="sk_keputusan">1. Surat Keputusan Kepala Sekolah</option>
+            <option value="sk_panitia">2. SK Panitia</option>
+            <option value="surat_edaran">3. Surat Edaran Biaya Sekolah</option>
+          </select>
+        </div>
+        <div class="preview-actions">
+          <button type="button" class="btn btn-outline" onclick="toggleForm()">
+            <i class="fas fa-edit"></i> <span id="toggleFormText">Buat Surat</span>
+          </button>
+          <button type="button" class="btn btn-prim" onclick="printDocument()">
+            <i class="fas fa-print"></i> Cetak
+          </button>
+        </div>
+      </div>
+
+      <div id="formContainer" class="form-container hidden">
+        <div id="dynamicFormContent">
+          <!-- Form akan diisi berdasarkan jenis surat -->
+        </div>
+      </div>
+
+      <div class="preview-wrap">
+        <div class="preview-container" id="previewContainer">
+          <!-- Preview akan diisi berdasarkan jenis surat -->
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Modal Konfirmasi Cetak -->
+<div id="printModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+  <div style="background: white; padding: 30px; border-radius: 10px; max-width: 500px; width: 90%;">
+    <h3 style="margin-bottom: 20px; color: var(--primary);">Konfirmasi Cetak</h3>
+    <p style="margin-bottom: 15px;">Apakah Anda yakin ingin mencetak surat?</p>
+    <p style="margin-bottom: 20px; font-size: 14px; color: var(--text-muted);">Pastikan semua data sudah terisi dengan benar sebelum mencetak.</p>
+    
+    <div style="display: flex; gap: 10px; justify-content: flex-end;">
+      <button type="button" class="btn btn-outline" onclick="hidePrintModal()">Batal</button>
+      <button type="button" class="btn btn-prim" onclick="printAllPreviews()">Ya, Cetak</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// --- GLOBAL STATE & CONFIG ---
+let currentJenisSurat = 'sk_keputusan';
+const IDENTITAS_KEY = 'identitasSekolah';
+let debounceTimer;
+let logoDataUrl = null;
+let guruData = []; // Untuk SK Keputusan
+let pengawasData = []; // Untuk SK Panitia
+let biayaData = []; // Untuk Surat Edaran
+
+// --- FORM TEMPLATES ---
+const formTemplates = {
+  sk_keputusan: `
+    <div class="tab-navigation">
+      <button type="button" class="tab-button active" onclick="showTab(1)">Data Utama SK</button>
+      <button type="button" class="tab-button" onclick="showTab(2)">Lampiran 1 - Pembagian Tugas</button>
+      <button type="button" class="tab-button" onclick="showTab(3)">Lampiran 2 - Tugas Tambahan</button>
+    </div>
+    
+    <div id="tab1" class="tab-content active">
+      <form id="suratForm">
+        <fieldset>
+          <legend>Data Surat Keputusan</legend>
+          <div style="display: flex; gap: 16px; margin-bottom: 15px;">
+            <div style="flex: 1;">
+              <div class="form-group">
+                <label for="nomor_surat">Nomor Surat *</label>
+                <input id="nomor_surat" type="text" placeholder="Contoh: 001/SK-KS/IX/2023" oninput="debounceUpdate()" required>
+                <span class="error-message">Nomor surat harus diisi.</span>
+              </div>
+            </div>
+            <div style="flex: 1;">
+              <div class="form-group">
+                <label for="tanggal_surat">Tanggal Surat *</label>
+                <input id="tanggal_surat" type="text" value="" placeholder="Contoh: 25 Oktober 2023" oninput="debounceUpdate()" required>
+                <span class="error-message">Tanggal surat harus diisi.</span>
+              </div>
+            </div>
+          </div>
+          <div style="display: flex; gap: 16px; margin-bottom: 15px;">
+            <div style="flex: 1;">
+              <div class="form-group">
+                <label for="tahun_pelajaran">Tahun Pelajaran *</label>
+                <input id="tahun_pelajaran" type="text" placeholder="Contoh: 2023/2024" oninput="debounceUpdate()" required>
+                <span class="error-message">Tahun pelajaran harus diisi.</span>
+              </div>
+            </div>
+          </div>
+        </fieldset>
+      </form>
+    </div>
+    
+    <div id="tab2" class="tab-content">
+      <h4>Pembagian Tugas Guru dan Tenaga Kependidikan</h4>
+      <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">Isi data pembagian tugas mengajar untuk lampiran 1</p>
+      
+      <div id="guruTableContainer">
+        <!-- Dynamic rows will be added here -->
+      </div>
+      
+      <button type="button" class="add-row-btn" onclick="addGuruRow()">
+        <i class="fas fa-plus"></i> Tambah Guru
+      </button>
+    </div>
+    
+    <div id="tab3" class="tab-content">
+      <h4>Pembagian Tugas Tambahan Guru</h4>
+      <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">Isi data tugas tambahan untuk lampiran 2</p>
+      
+      <div style="margin-left: 20px;">
+        <div class="form-group">
+          <label for="kepala_madrasah">KEPALA MADRASAH:</label>
+          <input id="kepala_madrasah" type="text" oninput="debounceUpdate()">
+        </div>
+        <div class="form-group">
+          <label for="waka_kurikulum">WAKA. KURIKULUM:</label>
+          <input id="waka_kurikulum" type="text" oninput="debounceUpdate()">
+        </div>
+        <div class="form-group">
+          <label for="waka_kesiswaan">WAKA. KESISWAAN:</label>
+          <input id="waka_kesiswaan" type="text" oninput="debounceUpdate()">
+        </div>
+        <div class="form-group">
+          <label for="bendahara">BENDAHARA:</label>
+          <input id="bendahara" type="text" oninput="debounceUpdate()">
+        </div>
+        <div class="form-group">
+          <label for="humas">HUMAS:</label>
+          <input id="humas" type="text" oninput="debounceUpdate()">
+        </div>
+        <div class="form-group">
+          <label for="sarpras">SARPRAS:</label>
+          <input id="sarpras" type="text" oninput="debounceUpdate()">
+        </div>
+        <div class="form-group">
+          <label for="wali_kelas_x">WALI KELAS X:</label>
+          <input id="wali_kelas_x" type="text" oninput="debounceUpdate()">
+        </div>
+        <div class="form-group">
+          <label for="wali_kelas_xi">WALI KELAS XI:</label>
+          <input id="wali_kelas_xi" type="text" oninput="debounceUpdate()">
+        </div>
+        <div class="form-group">
+          <label for="wali_kelas_xii">WALI KELAS XII:</label>
+          <input id="wali_kelas_xii" type="text" oninput="debounceUpdate()">
+        </div>
+        <div class="form-group">
+          <label for="operator">OPERATOR:</label>
+          <input id="operator" type="text" oninput="debounceUpdate()">
+        </div>
+        <div class="form-group">
+          <label for="tata_usaha">TATA USAHA:</label>
+          <input id="tata_usaha" type="text" oninput="debounceUpdate()">
+        </div>
+      </div>
+    </div>
+  `,
+  
+  sk_panitia: `
+    <div class="tab-navigation">
+      <button type="button" class="tab-button active" onclick="showTabPanitia(1)">Data Utama SK Panitia</button>
+      <button type="button" class="tab-button" onclick="showTabPanitia(2)">Lampiran - Daftar Pengawas</button>
+    </div>
+    
+    <div id="tabPanitia1" class="tab-content active">
+      <form id="suratForm">
+        <fieldset>
+          <legend>Data Surat Keputusan Panitia</legend>
+          <div style="display: flex; gap: 16px; margin-bottom: 15px;">
+            <div style="flex: 1;">
+              <div class="form-group">
+                <label for="nomor_surat_panitia">Nomor Surat *</label>
+                <input id="nomor_surat_panitia" type="text" placeholder="Contoh: 002/SK-PAN/IX/2023" oninput="debounceUpdate()" required>
+                <span class="error-message">Nomor surat harus diisi.</span>
+              </div>
+            </div>
+            <div style="flex: 1;">
+              <div class="form-group">
+                <label for="tanggal_surat_panitia">Tanggal Surat *</label>
+                <input id="tanggal_surat_panitia" type="text" placeholder="Contoh: 25 Oktober 2023" oninput="debounceUpdate()" required>
+                <span class="error-message">Tanggal surat harus diisi.</span>
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="nama_kegiatan">Nama Kegiatan *</label>
+            <input id="nama_kegiatan" type="text" placeholder="Contoh: Ujian Tengah Semester" oninput="debounceUpdate()" required>
+            <span class="error-message">Nama kegiatan harus diisi.</span>
+          </div>
+          <div class="form-group">
+            <label for="tahun_kegiatan">Tahun Kegiatan *</label>
+            <input id="tahun_kegiatan" type="text" placeholder="Contoh: 2023" oninput="debounceUpdate()" required>
+            <span class="error-message">Tahun kegiatan harus diisi.</span>
+          </div>
+        </fieldset>
+        
+        <fieldset>
+          <legend>Susunan Panitia</legend>
+          <div class="form-group">
+            <label for="ketua_panitia">Ketua Panitia *</label>
+            <input id="ketua_panitia" type="text" placeholder="Nama Ketua Panitia" oninput="debounceUpdate()" required>
+          </div>
+          <div class="form-group">
+            <label for="wakil_ketua">Wakil Ketua</label>
+            <input id="wakil_ketua" type="text" placeholder="Nama Wakil Ketua" oninput="debounceUpdate()">
+          </div>
+          <div class="form-group">
+            <label for="sekretaris">Sekretaris *</label>
+            <input id="sekretaris" type="text" placeholder="Nama Sekretaris" oninput="debounceUpdate()" required>
+          </div>
+          <div class="form-group">
+            <label for="bendahara_panitia">Bendahara *</label>
+            <input id="bendahara_panitia" type="text" placeholder="Nama Bendahara" oninput="debounceUpdate()" required>
+          </div>
+        </fieldset>
+      </form>
+    </div>
+    
+    <div id="tabPanitia2" class="tab-content">
+      <h4>Daftar Pengawas</h4>
+      <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">Isi data pengawas untuk lampiran</p>
+      
+      <div id="pengawasTableContainer">
+        <!-- Dynamic rows will be added here -->
+      </div>
+      
+      <button type="button" class="add-row-btn" onclick="addPengawasRow()">
+        <i class="fas fa-plus"></i> Tambah Pengawas
+      </button>
+    </div>
+  `,
+  
+  surat_edaran: `
+    <form id="suratForm">
+      <fieldset>
+        <legend>Data Surat Edaran</legend>
+        <div style="display: flex; gap: 16px; margin-bottom: 15px;">
+          <div style="flex: 1;">
+            <div class="form-group">
+              <label for="nomor_edaran">Nomor Surat *</label>
+              <input id="nomor_edaran" type="text" placeholder="Contoh: 001/SE/IX/2023" oninput="debounceUpdate()" required>
+              <span class="error-message">Nomor surat harus diisi.</span>
+            </div>
+          </div>
+          <div style="flex: 1;">
+            <div class="form-group">
+              <label for="tanggal_edaran">Tanggal Surat *</label>
+              <input id="tanggal_edaran" type="text" placeholder="Contoh: 25 Oktober 2023" oninput="debounceUpdate()" required>
+              <span class="error-message">Tanggal surat harus diisi.</span>
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="tahun_pelajaran_edaran">Tahun Pelajaran *</label>
+          <input id="tahun_pelajaran_edaran" type="text" placeholder="Contoh: 2023/2024" oninput="debounceUpdate()" required>
+          <span class="error-message">Tahun pelajaran harus diisi.</span>
+        </div>
+        <div class="form-group">
+          <label for="tanggal_mulai_pembayaran">Tanggal Mulai Pembayaran *</label>
+          <input id="tanggal_mulai_pembayaran" type="text" placeholder="Contoh: 1 November 2023" oninput="debounceUpdate()" required>
+          <span class="error-message">Tanggal mulai pembayaran harus diisi.</span>
+        </div>
+        <div class="form-group">
+          <label for="tanggal_akhir_pembayaran">Tanggal Akhir Pembayaran *</label>
+          <input id="tanggal_akhir_pembayaran" type="text" placeholder="Contoh: 15 November 2023" oninput="debounceUpdate()" required>
+          <span class="error-message">Tanggal akhir pembayaran harus diisi.</span>
+        </div>
+        <div class="form-group">
+          <label for="metode_pembayaran">Metode Pembayaran *</label>
+          <input id="metode_pembayaran" type="text" placeholder="Contoh: Bendahara Sekolah/Transfer Rekening" oninput="debounceUpdate()" required>
+          <span class="error-message">Metode pembayaran harus diisi.</span>
+        </div>
+      </fieldset>
+      
+      <h4>Rincian Biaya Sekolah</h4>
+      <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">Isi data rincian biaya untuk surat edaran</p>
+      
+      <div id="biayaTableContainer">
+        <!-- Dynamic rows will be added here -->
+      </div>
+      
+      <button type="button" class="add-row-btn" onclick="addBiayaRow()">
+        <i class="fas fa-plus"></i> Tambah Rincian Biaya
+      </button>
+    </form>
+  `
+};
+
+// --- LETTER TEMPLATES ---
+const templates = {
+  sk_keputusan: data => {
+    const guruData = data.guruData || [];
+    
+    return {
+      lembar1: `
+        <div class="letterhead">
+          <div class="logo-placeholder">
+            ${logoDataUrl ? `<img src="${logoDataUrl}" alt="Logo">` : '<i class="fas fa-school"></i>'}
+          </div>
+          <div class="letterhead-text">
+            <p style="font-size: 12pt; margin: 0;">${data.yayasan ? data.yayasan.toUpperCase() : 'YAYASAN PENDIDIKAN'}</p>
+            <p style="font-size: 13pt; margin: 0;">KECAMATAN ${data.kecamatan ? data.kecamatan.toUpperCase() : 'KECAMATAN'}</p>
+            <p style="font-size: 14pt; margin: 0;">${data.nama_sekolah ? data.nama_sekolah.toUpperCase() : 'SEKOLAH DASAR'}</p>
+            <p style="font-size: 8pt; margin-top: 5px;">Jl. Raya Lintas Timur No. 03, Kecamatan ${data.kecamatan || '...................'}, Kabupaten ${data.kabupaten || '...................'}</p>
+          </div>
+        </div>
+        
+        <div class="center" style="margin-bottom: 20px;">
+          <h3 class="u">SURAT KEPUTUSAN</h3>
+          <h3 class="u">KEPALA ${data.nama_sekolah ? data.nama_sekolah.toUpperCase() : 'SEKOLAH'}</h3>
+          <p style="font-size: 12pt; text-align: center; margin-top: 0; line-height: 1;">NOMOR : ${data.nomor_surat || '……………………………'}</p>
+        </div>
+        
+        <div class="center" style="margin-bottom: 30px;">
+          <h3 class="u">TENTANG :</h3>
+		    <br>
+          <p style="font-size: 12pt; text-align: center; margin-top: 0; line-height: 1;">
+            PEMBAGIAN TUGAS GURU / STAF / KARYAWAN<br>
+            DALAM KEGIATAN PROSES BELAJAR MENGAJAR ATAU BIMBINGAN<br>
+            Tahun Pelajaran ${data.tahun_pelajaran || '20…./20….'}
+          </p>
+        </div>
+        
+        <table class="tiga-kolom">
+          <tr>
+            <td>Menimbang</td>
+            <td>:</td>
+            <td style="text-align: justify; line-height: 1;">Bahwa dalam rangka memperlancar pelaksanaan proses belajar mengajar di ${data.nama_sekolah || '...................'} perlu menetapkan Pembagian Tugas Guru.</td>
+          </tr>
+          <tr>
+            <td>Mengingat</td>
+            <td>:</td>
+            <td style="text-align: justify; line-height: 1;">
+              <div style="margin-left: 0;">
+                <div>1. Undang-Undang Nomor 20 Tahun 2003, tentang Sistem Pendidikan Nasional</div>
+                <div>2. Keputusan Menteri Pendidikan Nasional Republik Indonesia Nomor : 118/U/2002, tentang Penyesuaian Garis-Garis Besar Program Pengajaran dan Penilaian pada Sistem Semester.</div>
+                <div>3. Kurikulum tahun 2006 dan Kurikulum KTSP</div>
+                <div>4. PMA Nomor 00012 tentang kurikulum 2013</div>
+                <div>5. Pedoman Penghitungan Beban Kerja Guru Departemen Pendidikan Nasional</div>
+              </div>
+            </td>
+          </tr>
+        </table>
+        
+        <div class="center" style="margin: 20px 0;">
+          <h3 class="u">MEMUTUSKAN</h3>
+        </div>
+        
+        <table class="tiga-kolom">
+          <tr>
+            <td>Menetapkan</td>
+            <td>:</td>
+            <td style="text-align: justify; line-height: 1;">Pembagian Tugas Guru Dalam Proses Belajar Mengajar</td>
+          </tr>
+          <tr>
+            <td>Pertama</td>
+            <td>:</td>
+            <td style="text-align: justify; line-height: 1;">Pembagian tugas guru dalam kegiatan belajar mengajar pada tahun pembelajaran seperti tersebut lampiran I Keputusan ini.</td>
+          </tr>
+          <tr>
+            <td>Kedua</td>
+            <td>:</td>
+            <td style="text-align: justify; line-height: 1;">Memutuskan guru untuk melaksanakan tugas tambahan dan tugas bimbingan seperti tersebut pada lampiran Ke-II Keputusan ini.</td>
+          </tr>
+          <tr>
+            <td>Ketiga</td>
+            <td>:</td>
+            <td style="text-align: justify; line-height: 1;">Masing-masing Guru melaporkan pelaksanaan tugasnya secara tertulis dan berkala kepada Kepala Sekolah.</td>
+          </tr>
+          <tr>
+            <td>Keempat</td>
+            <td>:</td>
+            <td style="text-align: justify; line-height: 1;">Segala biaya yang timbul akibat pelaksanaan keputusan ini dibebankan pada anggaran yang sesuai.</td>
+          </tr>
+          <tr>
+            <td>Kelima</td>
+            <td>:</td>
+            <td style="text-align: justify; line-height: 1;">Apabila terdapat kekeliruan dalam keputusan ini, akan dibetulkan sebagaimana mestinya.</td>
+          </tr>
+          <tr>
+            <td>Keenam</td>
+            <td>:</td>
+            <td style="text-align: justify; line-height: 1;">Keputusan ini berlaku sejak tanggal ditetapkan dengan catatan apabila terdapat kekeliruan dalam keputusan ini akan dibetulkan sebagaimana mestinya.</td>
+          </tr>
+        </table>
+        
+        <div class="tempat-tanggal-kanan">
+          <p>Ditetapkan di &nbsp;&nbsp;&nbsp;&nbsp;: ${data.tempat_ttd || 'Rajabasa Baru'}</p>
+          <p>Pada tanggal &nbsp;&nbsp;: ${data.tanggal_surat || '……………………………'}</p>
+        </div>
+        
+        <div class="penandatanganan-kanan">
+          <p style="line-height: 1;">Kepala ${data.nama_sekolah || '...................'}</p>
+          <br><br><br><br><br>
+          <p style="line-height: 1;"><strong><u>${data.nama_kepala_sekolah || '……………………………'}</u></strong></p>
+          <p style="line-height: 1;">NIP. .................................</p>
+        </div>
+      `,
+      
+      lembar2: `
+        <div class="letterhead">
+          <div class="logo-placeholder">
+            ${logoDataUrl ? `<img src="${logoDataUrl}" alt="Logo">` : '<i class="fas fa-school"></i>'}
+          </div>
+          <div class="letterhead-text">
+            <p style="font-size: 12pt; margin: 0;">${data.yayasan ? data.yayasan.toUpperCase() : 'YAYASAN PENDIDIKAN'}</p>
+            <p style="font-size: 13pt; margin: 0;">KECAMATAN ${data.kecamatan ? data.kecamatan.toUpperCase() : 'KECAMATAN'}</p>
+            <p style="font-size: 14pt; margin: 0;">${data.nama_sekolah ? data.nama_sekolah.toUpperCase() : 'SEKOLAH DASAR'}</p>
+            <p style="font-size: 8pt; margin-top: 5px;">Jl. Raya Lintas Timur No. 03, Kecamatan ${data.kecamatan || '...................'}, Kabupaten ${data.kabupaten || '...................'}</p>
+          </div>
+        </div>
+        
+        <div class="center" style="margin-bottom: 20px;">
+          <h3 class="u">LAMPIRAN I</h3>
+          <p class="nomor-surat" style="font-size: 12pt; text-align: center; margin-top: 0; line-height: 1;">Nomor: ${data.nomor_surat || '……………………………'}</p>
+          <p style="font-size: 12pt; text-align: center; margin-top: 5px; line-height: 1;">TENTANG</p>
+		    <br>
+          <p class="u" style="font-size: 14pt; margin-top: 10px; line-height: 1;">PEMBAGIAN TUGAS GURU DAN TENAGA KEPENDIDIKAN</p>
+          <p style="font-size: 12pt; margin-top: 5px; line-height: 1;">TAHUN PELAJARAN ${data.tahun_pelajaran || '20…./20….'}</p>
+        </div>
+        
+        <table class="dengan-garis">
+          <thead>
+            <tr>
+              <th>No</th>
+              <th>Nama Guru</th>
+              <th>Mata Pelajaran</th>
+              <th>Kelas</th>
+              <th>JTM</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${guruData.length > 0 ? 
+              guruData.map((guru, index) => `
+                <tr>
+                  <td>${index + 1}</td>
+                  <td>${guru.nama || '........................'}</td>
+                  <td>${guru.mapel || '........................'}</td>
+                  <td>${guru.kelas || '.........'}</td>
+                  <td>${guru.jtm || '....'}</td>
+                </tr>
+              `).join('') : 
+              `<tr><td colspan="5" style="text-align: center;">Belum ada data guru</td></tr>`
+            }
+          </tbody>
+        </table>
+        
+        <div class="tempat-tanggal-kanan">
+          <p>Ditetapkan di &nbsp;&nbsp;&nbsp;&nbsp;: ${data.tempat_ttd || 'Rajabasa Baru'}</p>
+          <p>Pada tanggal &nbsp;&nbsp;: ${data.tanggal_surat || '……………………………'}</p>
+        </div>
+        
+        <div class="penandatanganan-kanan">
+          <p style="line-height: 1;">Kepala ${data.nama_sekolah || '...................'}</p>
+          <br><br><br><br><br>
+          <p style="line-height: 1;"><strong><u>${data.nama_kepala_sekolah || '……………………………'}</u></strong></p>
+          <p style="line-height: 1;">NIP. .................................</p>
+        </div>
+      `,
+      
+      lembar3: `
+        <div class="letterhead">
+          <div class="logo-placeholder">
+            ${logoDataUrl ? `<img src="${logoDataUrl}" alt="Logo">` : '<i class="fas fa-school"></i>'}
+          </div>
+          <div class="letterhead-text">
+            <p style="font-size: 12pt; margin: 0;">${data.yayasan ? data.yayasan.toUpperCase() : 'YAYASAN PENDIDIKAN'}</p>
+            <p style="font-size: 13pt; margin: 0;">KECAMATAN ${data.kecamatan ? data.kecamatan.toUpperCase() : 'KECAMATAN'}</p>
+            <p style="font-size: 14pt; margin: 0;">${data.nama_sekolah ? data.nama_sekolah.toUpperCase() : 'SEKOLAH DASAR'}</p>
+            <p style="font-size: 8pt; margin-top: 5px;">Jl. Raya Lintas Timur No. 03, Kecamatan ${data.kecamatan || '...................'}, Kabupaten ${data.kabupaten || '...................'}</p>
+          </div>
+        </div>
+        
+        <div class="center" style="margin-bottom: 20px;">
+          <h3 class="u">LAMPIRAN II</h3>
+          <p class="nomor-surat" style="font-size: 12pt; text-align: center; margin-top: 0; line-height: 1;">Nomor: ${data.nomor_surat || '……………………………'}</p>
+          <p style="font-size: 12pt; text-align: center; margin-top: 5px; line-height: 1;">TENTANG</p>
+		    <br>
+          <p class="u" style="font-size: 14pt; margin-top: 10px; line-height: 1;">PEMBAGIAN TUGAS TAMBAHAN GURU</p>
+          <p style="font-size: 12pt; margin-top: 5px; line-height: 1;">TAHUN PELAJARAN ${data.tahun_pelajaran || '20…./20….'}</p>
+        </div>
+        
+        <div style="margin: 30px 0;">
+          <table class="tanpa-garis">
+            <tr>
+              <td style="width: 40%; font-weight: bold;">KEPALA MADRASAH</td>
+              <td style="width: 5%;">:</td>
+              <td>${data.kepala_madrasah || '.................................'}</td>
+            </tr>
+            <tr>
+              <td style="font-weight: bold;">WAKA. KURIKULUM</td>
+              <td>:</td>
+              <td>${data.waka_kurikulum || '.................................'}</td>
+            </tr>
+            <tr>
+              <td style="font-weight: bold;">WAKA. KESISWAAN</td>
+              <td>:</td>
+              <td>${data.waka_kesiswaan || '.................................'}</td>
+            </tr>
+            <tr>
+              <td style="font-weight: bold;">BENDAHARA</td>
+              <td>:</td>
+              <td>${data.bendahara || '.................................'}</td>
+            </tr>
+            <tr>
+              <td style="font-weight: bold;">HUMAS</td>
+              <td>:</td>
+              <td>${data.humas || '.................................'}</td>
+            </tr>
+            <tr>
+              <td style="font-weight: bold;">SARPRAS</td>
+              <td>:</td>
+              <td>${data.sarpras || '.................................'}</td>
+            </tr>
+            <tr>
+              <td style="font-weight: bold;">WALI KELAS X</td>
+              <td>:</td>
+              <td>${data.wali_kelas_x || '.................................'}</td>
+            </tr>
+            <tr>
+              <td style="font-weight: bold;">WALI KELAS XI</td>
+              <td>:</td>
+              <td>${data.wali_kelas_xi || '.................................'}</td>
+            </tr>
+            <tr>
+              <td style="font-weight: bold;">WALI KELAS XII</td>
+              <td>:</td>
+              <td>${data.wali_kelas_xii || '.................................'}</td>
+            </tr>
+            <tr>
+              <td style="font-weight: bold;">OPERATOR</td>
+              <td>:</td>
+              <td>${data.operator || '.................................'}</td>
+            </tr>
+            <tr>
+              <td style="font-weight: bold;">TATA USAHA</td>
+              <td>:</td>
+              <td>${data.tata_usaha || '.................................'}</td>
+            </tr>
+          </table>
+        </div>
+        
+        <div class="tempat-tanggal-kanan">
+          <p>Ditetapkan di &nbsp;&nbsp;&nbsp;&nbsp;: ${data.tempat_ttd || 'Rajabasa Baru'}</p>
+          <p>Pada tanggal &nbsp;&nbsp;: ${data.tanggal_surat || '……………………………'}</p>
+        </div>
+        
+        <div class="penandatanganan-kanan">
+          <p style="line-height: 1;">Kepala ${data.nama_sekolah || '...................'}</p>
+          <br><br><br><br><br>
+          <p style="line-height: 1;"><strong><u>${data.nama_kepala_sekolah || '……………………………'}</u></strong></p>
+          <p style="line-height: 1;">NIP. .................................</p>
+        </div>
+      `
+    };
+  },
+  
+  sk_panitia: data => {
+    const pengawasData = data.pengawasData || [];
+    
+    return {
+      lembar1: `
+        <div class="letterhead">
+          <div class="logo-placeholder">
+            ${logoDataUrl ? `<img src="${logoDataUrl}" alt="Logo">` : '<i class="fas fa-school"></i>'}
+          </div>
+          <div class="letterhead-text">
+            <p style="font-size: 12pt; margin: 0;">${data.yayasan ? data.yayasan.toUpperCase() : 'YAYASAN PENDIDIKAN'}</p>
+            <p style="font-size: 13pt; margin: 0;">KECAMATAN ${data.kecamatan ? data.kecamatan.toUpperCase() : 'KECAMATAN'}</p>
+            <p style="font-size: 14pt; margin: 0;">${data.nama_sekolah ? data.nama_sekolah.toUpperCase() : 'SEKOLAH DASAR'}</p>
+            <p style="font-size: 8pt; margin-top: 5px;">Jl. Raya Lintas Timur No. 03, Kecamatan ${data.kecamatan || '...................'}, Kabupaten ${data.kabupaten || '...................'}</p>
+          </div>
+        </div>
+        
+        <div class="center" style="margin-bottom: 20px;">
+          <h3 class="u">SURAT KEPUTUSAN</h3>
+          <h3 class="u">KEPALA ${data.nama_sekolah ? data.nama_sekolah.toUpperCase() : 'SEKOLAH'}</h3>
+          <p style="font-size: 12pt; text-align: center; margin-top: 0; line-height: 1;">NOMOR : ${data.nomor_surat_panitia || '……………………………'}</p>
+        </div>
+        
+        <div class="center" style="margin-bottom: 30px;">
+          <h3 class="u">TENTANG :</h3>
+		    <br>
+          <p style="font-size: 12pt; text-align: center; margin-top: 0; line-height: 1;">
+            PEMBENTUKAN PANITIA PELAKSANA<br>
+            ${data.nama_kegiatan ? data.nama_kegiatan.toUpperCase() : 'KEGIATAN SEKOLAH'}<br>
+            TAHUN ${data.tahun_kegiatan || '20..'}
+          </p>
+        </div>
+        
+        <table class="tiga-kolom">
+          <tr>
+            <td>Menimbang</td>
+            <td>:</td>
+            <td style="text-align: justify; line-height: 1;">Bahwa dalam rangka pelaksanaan ${data.nama_kegiatan || 'kegiatan sekolah'} di ${data.nama_sekolah || '...................'} perlu dibentuk Panitia Pelaksana.</td>
+          </tr>
+          <tr>
+            <td>Mengingat</td>
+            <td>:</td>
+            <td style="text-align: justify; line-height: 1;">
+              <div style="margin-left: 0;">
+                <div>1. Undang-Undang Nomor 20 Tahun 2003 tentang Sistem Pendidikan Nasional</div>
+                <div>2. Peraturan Pemerintah tentang Pengelolaan dan Penyelenggaraan Pendidikan</div>
+                <div>3. Peraturan Menteri Pendidikan dan Kebudayaan terkait</div>
+                <div>4. Rapat Persiapan tanggal ${data.tanggal_surat_panitia || '...................'}</div>
+              </div>
+            </td>
+          </tr>
+        </table>
+        
+        <div class="center" style="margin: 20px 0;">
+          <h3 class="u">MEMUTUSKAN</h3>
+        </div>
+        
+        <table class="tiga-kolom">
+          <tr>
+            <td>Menetapkan</td>
+            <td>:</td>
+            <td style="text-align: justify; line-height: 1;">Pembentukan Panitia Pelaksana ${data.nama_kegiatan || 'Kegiatan Sekolah'}</td>
+          </tr>
+          <tr>
+            <td>Kesatu</td>
+            <td>:</td>
+            <td style="text-align: justify; line-height: 1;">Membentuk Panitia Pelaksana ${data.nama_kegiatan || 'Kegiatan Sekolah'} dengan susunan sebagai berikut:</td>
+          </tr>
+        </table>
+        
+        <div style="margin: 20px 0 30px 50px;">
+          <table class="tanpa-garis">
+            <tr>
+              <td style="width: 150px; font-weight: bold;">Ketua</td>
+              <td style="width: 10px;">:</td>
+              <td>${data.ketua_panitia || '.................................'}</td>
+            </tr>
+            ${data.wakil_ketua ? `
+            <tr>
+              <td style="font-weight: bold;">Wakil Ketua</td>
+              <td>:</td>
+              <td>${data.wakil_ketua}</td>
+            </tr>
+            ` : ''}
+            <tr>
+              <td style="font-weight: bold;">Sekretaris</td>
+              <td>:</td>
+              <td>${data.sekretaris || '.................................'}</td>
+            </tr>
+            <tr>
+              <td style="font-weight: bold;">Bendahara</td>
+              <td>:</td>
+              <td>${data.bendahara_panitia || '.................................'}</td>
+            </tr>
+          </table>
+        </div>
+        
+        <table class="tiga-kolom">
+          <tr>
+            <td>Kedua</td>
+            <td>:</td>
+            <td style="text-align: justify; line-height: 1;">Panitia sebagaimana dimaksud dalam diktum Kesatu mempunyai tugas menyusun program kerja, melaksanakan kegiatan, dan membuat laporan pertanggungjawaban.</td>
+          </tr>
+          <tr>
+            <td>Ketiga</td>
+            <td>:</td>
+            <td style="text-align: justify; line-height: 1;">Segala biaya yang timbul akibat pelaksanaan keputusan ini dibebankan pada anggaran yang sesuai.</td>
+          </tr>
+          <tr>
+            <td>Keempat</td>
+            <td>:</td>
+            <td style="text-align: justify; line-height: 1;">Keputusan ini berlaku sejak tanggal ditetapkan.</td>
+          </tr>
+        </table>
+        
+        <div class="tempat-tanggal-kanan">
+          <p>Ditetapkan di &nbsp;&nbsp;&nbsp;&nbsp;: ${data.tempat_ttd || 'Rajabasa Baru'}</p>
+          <p>Pada tanggal &nbsp;&nbsp;: ${data.tanggal_surat_panitia || '……………………………'}</p>
+        </div>
+        
+        <div class="penandatanganan-kanan">
+          <p style="line-height: 1;">Kepala ${data.nama_sekolah || '...................'}</p>
+          <br><br><br><br><br>
+          <p style="line-height: 1;"><strong><u>${data.nama_kepala_sekolah || '……………………………'}</u></strong></p>
+          <p style="line-height: 1;">NIP. .................................</p>
+        </div>
+      `,
+      
+      lembar2: `
+        <div class="letterhead">
+          <div class="logo-placeholder">
+            ${logoDataUrl ? `<img src="${logoDataUrl}" alt="Logo">` : '<i class="fas fa-school"></i>'}
+          </div>
+          <div class="letterhead-text">
+            <p style="font-size: 12pt; margin: 0;">${data.yayasan ? data.yayasan.toUpperCase() : 'YAYASAN PENDIDIKAN'}</p>
+            <p style="font-size: 13pt; margin: 0;">KECAMATAN ${data.kecamatan ? data.kecamatan.toUpperCase() : 'KECAMATAN'}</p>
+            <p style="font-size: 14pt; margin: 0;">${data.nama_sekolah ? data.nama_sekolah.toUpperCase() : 'SEKOLAH DASAR'}</p>
+            <p style="font-size: 8pt; margin-top: 5px;">Jl. Raya Lintas Timur No. 03, Kecamatan ${data.kecamatan || '...................'}, Kabupaten ${data.kabupaten || '...................'}</p>
+          </div>
+        </div>
+        
+        <div class="center" style="margin-bottom: 20px;">
+          <h3 class="u">LAMPIRAN</h3>
+          <p class="nomor-surat" style="font-size: 12pt; text-align: center; margin-top: 0; line-height: 1;">Nomor: ${data.nomor_surat_panitia || '……………………………'}</p>
+          <p style="font-size: 12pt; text-align: center; margin-top: 5px; line-height: 1;">TENTANG</p>
+		  <br>
+          <p class="u" style="font-size: 14pt; margin-top: 10px; line-height: 1;">DAFTAR PENGAWAS ${data.nama_kegiatan ? data.nama_kegiatan.toUpperCase() : 'KEGIATAN SEKOLAH'}</p>
+          <p style="font-size: 12pt; margin-top: 5px; line-height: 1;">TAHUN ${data.tahun_kegiatan || '20..'}</p>
+        </div>
+        
+        <table class="dengan-garis">
+          <thead>
+            <tr>
+              <th>No</th>
+              <th>Nama Guru</th>
+              <th>Jabatan</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${pengawasData.length > 0 ? 
+              pengawasData.map((pengawas, index) => `
+                <tr>
+                  <td>${index + 1}</td>
+                  <td>${pengawas.nama || '........................'}</td>
+                  <td>${pengawas.jabatan || '........................'}</td>
+                </tr>
+              `).join('') : 
+              `<tr><td colspan="3" style="text-align: center;">Belum ada data pengawas</td></tr>`
+            }
+          </tbody>
+        </table>
+        
+        <div class="tempat-tanggal-kanan">
+          <p>Ditetapkan di &nbsp;&nbsp;&nbsp;&nbsp;: ${data.tempat_ttd || 'Rajabasa Baru'}</p>
+          <p>Pada tanggal &nbsp;&nbsp;: ${data.tanggal_surat_panitia || '……………………………'}</p>
+        </div>
+        
+        <div class="penandatanganan-kanan">
+          <p style="line-height: 1;">Kepala ${data.nama_sekolah || '...................'}</p>
+          <br><br><br><br><br>
+          <p style="line-height: 1;"><strong><u>${data.nama_kepala_sekolah || '……………………………'}</u></strong></p>
+          <p style="line-height: 1;">NIP. .................................</p>
+        </div>
+      `
+    };
+  },
+  
+  surat_edaran: data => {
+    const biayaData = data.biayaData || [];
+    
+    return {
+      lembar1: `
+        <div class="letterhead">
+          <div class="logo-placeholder">
+            ${logoDataUrl ? `<img src="${logoDataUrl}" alt="Logo">` : '<i class="fas fa-school"></i>'}
+          </div>
+          <div class="letterhead-text">
+            <p style="font-size: 12pt; margin: 0;">${data.yayasan ? data.yayasan.toUpperCase() : 'YAYASAN PENDIDIKAN'}</p>
+            <p style="font-size: 13pt; margin: 0;">KECAMATAN ${data.kecamatan ? data.kecamatan.toUpperCase() : 'KECAMATAN'}</p>
+            <p style="font-size: 14pt; margin: 0;">${data.nama_sekolah ? data.nama_sekolah.toUpperCase() : 'SEKOLAH DASAR'}</p>
+            <p style="font-size: 8pt; margin-top: 5px;">Jl. Raya Lintas Timur No. 03, Kecamatan ${data.kecamatan || '...................'}, Kabupaten ${data.kabupaten || '...................'}</p>
+          </div>
+        </div>
+        
+        <div class="center" style="margin-bottom: 20px;">
+          <h3 class="u">SURAT EDARAN</h3>
+          <p style="font-size: 12pt; text-align: center; margin-top: 0; line-height: 1;">NOMOR : ${data.nomor_edaran || '……………………………'}</p>
+        </div>
+        
+        <div class="center" style="margin-bottom: 30px;">
+          <h3 class="u">TENTANG</h3>
+		    <br>
+          <p class="u" style="font-size: 14pt; margin-top: 10px; line-height: 1;">Pemberitahuan Biaya Sekolah</p>
+          <p style="font-size: 12pt; margin-top: 5px; line-height: 1;">TAHUN PELAJARAN ${data.tahun_pelajaran_edaran || '20…./20….'}</p>
+        </div>
+        
+        <div class="justify" style="margin: 20px 0;">
+          <p style="line-height: 1;">Yth.</p>
+          <p style="line-height: 1;">Bapak/Ibu Orang Tua/Wali Peserta Didik</p>
+          <p style="line-height: 1;">di</p>
+          <p style="line-height: 1;">Tempat</p>
+        </div>
+        
+        <div class="justify" style="margin: 20px 0;">
+          <p style="line-height: 1;">Assalamu'alaikum Wr. Wb</p>
+          <p style="line-height: 1;">Dengan hormat,</p>
+          <p style="line-height: 1;">Dalam rangka menunjang kelancaran proses pembelajaran dan operasional sekolah pada Tahun Pelajaran ${data.tahun_pelajaran_edaran || '20…./20….'}, bersama ini kami sampaikan pemberitahuan mengenai biaya sekolah yang perlu dipenuhi oleh orang tua/wali peserta didik.</p>
+        </div>
+        
+        <div class="justify" style="margin: 20px 0;">
+          <p style="line-height: 1;">Adapun rincian biaya sekolah dimaksud meliputi:</p>
+          <table class="dengan-garis">
+            <thead>
+              <tr>
+                <th>No</th>
+                <th>Rincian</th>
+                <th>Kelas X</th>
+                <th>Kelas XI</th>
+                <th>Kelas XII</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${biayaData.length > 0 ? 
+                biayaData.map((biaya, index) => `
+                  <tr>
+                    <td>${index + 1}</td>
+                    <td>${biaya.rincian || '................'}</td>
+                    <td>${biaya.kelas_x || '........'}</td>
+                    <td>${biaya.kelas_xi || '........'}</td>
+                    <td>${biaya.kelas_xii || '........'}</td>
+                  </tr>
+                `).join('') : 
+                `<tr><td colspan="5" style="text-align: center;">Belum ada data biaya</td></tr>`
+              }
+            </tbody>
+          </table>
+        </div>
+        
+        <div class="justify" style="margin: 20px 0;">
+          <p style="line-height: 1;">Pembayaran biaya sekolah tersebut dapat dilakukan mulai tanggal ${data.tanggal_mulai_pembayaran || '…………………'} sampai dengan ${data.tanggal_akhir_pembayaran || '…………………'} melalui ${data.metode_pembayaran || '…………………'} (bendahara sekolah/transfer rekening sekolah). Langsung ke bendahara Sekolah</p>
+        </div>
+        
+        <div class="justify" style="margin: 20px 0;">
+          <p style="line-height: 1;">Kami berharap Bapak/Ibu dapat bekerja sama untuk memenuhi kewajiban ini tepat waktu demi kelancaran kegiatan belajar mengajar dan peningkatan mutu layanan pendidikan di sekolah kami.</p>
+        </div>
+        
+        <div class="justify" style="margin: 20px 0;">
+          <p style="line-height: 1;">Demikian surat edaran ini kami sampaikan. Atas perhatian dan kerja sama Bapak/Ibu, kami ucapkan terima kasih.</p>
+          <p style="line-height: 1;">Wasalamu'alaikum wr.wb</p>
+        </div>
+        
+        <div class="tempat-tanggal-kanan">
+          <p>Ditetapkan di &nbsp;&nbsp;&nbsp;&nbsp;: ${data.tempat_ttd || 'Rajabasa Baru'}</p>
+          <p>Pada tanggal &nbsp;&nbsp;: ${data.tanggal_edaran || '……………………………'}</p>
+        </div>
+        
+        <div class="penandatanganan-kanan">
+          <p style="line-height: 1;">Kepala Sekolah</p>
+          <br><br><br><br><br>
+          <p style="line-height: 1;"><strong><u>(………………………………………)</u></strong></p>
+          <p style="line-height: 1;">NIP. ……………………………</p>
+        </div>
+      `
+    };
+  }
+};
+
+// --- HELPER FUNCTIONS ---
+function getAllData() {
+  const data = {};
+  
+  // Data Identitas Sekolah
+  data.nama_sekolah = document.getElementById('nama_sekolah').value;
+  data.kecamatan = document.getElementById('kecamatan').value;
+  data.yayasan = document.getElementById('yayasan').value;
+  data.nama_kepala_sekolah = document.getElementById('nama_kepala_sekolah').value;
+  data.tempat_ttd = document.getElementById('tempat_ttd').value;
+  
+  // Data berdasarkan jenis surat
+  if (currentJenisSurat === 'sk_keputusan') {
+    data.nomor_surat = document.getElementById('nomor_surat')?.value || '';
+    data.tanggal_surat = document.getElementById('tanggal_surat')?.value || '';
+    data.tahun_pelajaran = document.getElementById('tahun_pelajaran')?.value || '';
+    
+    // Data Lampiran 1 (Guru)
+    data.guruData = guruData;
+    
+    // Data Lampiran 2 (Tugas Tambahan)
+    data.kepala_madrasah = document.getElementById('kepala_madrasah')?.value || '';
+    data.waka_kurikulum = document.getElementById('waka_kurikulum')?.value || '';
+    data.waka_kesiswaan = document.getElementById('waka_kesiswaan')?.value || '';
+    data.bendahara = document.getElementById('bendahara')?.value || '';
+    data.humas = document.getElementById('humas')?.value || '';
+    data.sarpras = document.getElementById('sarpras')?.value || '';
+    data.wali_kelas_x = document.getElementById('wali_kelas_x')?.value || '';
+    data.wali_kelas_xi = document.getElementById('wali_kelas_xi')?.value || '';
+    data.wali_kelas_xii = document.getElementById('wali_kelas_xii')?.value || '';
+    data.operator = document.getElementById('operator')?.value || '';
+    data.tata_usaha = document.getElementById('tata_usaha')?.value || '';
+  } else if (currentJenisSurat === 'sk_panitia') {
+    data.nomor_surat_panitia = document.getElementById('nomor_surat_panitia')?.value || '';
+    data.tanggal_surat_panitia = document.getElementById('tanggal_surat_panitia')?.value || '';
+    data.nama_kegiatan = document.getElementById('nama_kegiatan')?.value || '';
+    data.tahun_kegiatan = document.getElementById('tahun_kegiatan')?.value || '';
+    data.ketua_panitia = document.getElementById('ketua_panitia')?.value || '';
+    data.wakil_ketua = document.getElementById('wakil_ketua')?.value || '';
+    data.sekretaris = document.getElementById('sekretaris')?.value || '';
+    data.bendahara_panitia = document.getElementById('bendahara_panitia')?.value || '';
+    
+    // Data Pengawas untuk Lampiran
+    data.pengawasData = pengawasData;
+  } else if (currentJenisSurat === 'surat_edaran') {
+    data.nomor_edaran = document.getElementById('nomor_edaran')?.value || '';
+    data.tanggal_edaran = document.getElementById('tanggal_edaran')?.value || '';
+    data.tahun_pelajaran_edaran = document.getElementById('tahun_pelajaran_edaran')?.value || '';
+    data.tanggal_mulai_pembayaran = document.getElementById('tanggal_mulai_pembayaran')?.value || '';
+    data.tanggal_akhir_pembayaran = document.getElementById('tanggal_akhir_pembayaran')?.value || '';
+    data.metode_pembayaran = document.getElementById('metode_pembayaran')?.value || '';
+    
+    // Data Biaya untuk surat edaran
+    data.biayaData = biayaData;
+  }
+  
+  data.logoDataUrl = logoDataUrl;
+  
+  return data;
+}
+
+// --- CORE LOGIC ---
+function handleJenisSuratChange() {
+  currentJenisSurat = document.getElementById('jenisSurat').value;
+  renderForm();
+  updatePreview();
+}
+
+function renderForm() {
+  const formContent = document.getElementById('dynamicFormContent');
+  const template = formTemplates[currentJenisSurat] || '';
+  formContent.innerHTML = template;
+  
+  // Inisialisasi data khusus untuk setiap jenis surat
+  if (currentJenisSurat === 'sk_keputusan') {
+    if (guruData.length === 0) {
+      addGuruRow();
+    }
+  } else if (currentJenisSurat === 'sk_panitia') {
+    if (pengawasData.length === 0) {
+      addPengawasRow();
+    }
+  } else if (currentJenisSurat === 'surat_edaran') {
+    if (biayaData.length === 0) {
+      addBiayaRow();
+    }
+  }
+}
+
+function updatePreview() {
+  const data = getAllData();
+  const template = templates[currentJenisSurat];
+  const previewContainer = document.getElementById('previewContainer');
+  
+  if (!template) return;
+  
+  const previews = template(data);
+  
+  if (currentJenisSurat === 'sk_keputusan') {
+    // Untuk SK Keputusan, tampilkan 3 lembar
+    previewContainer.innerHTML = `
+      <div id="preview1" class="preview">
+        <div class="paper" id="paperContent1">
+          ${previews.lembar1}
+        </div>
+      </div>
+      <div id="preview2" class="preview">
+        <div class="paper" id="paperContent2">
+          ${previews.lembar2}
+        </div>
+      </div>
+      <div id="preview3" class="preview">
+        <div class="paper" id="paperContent3">
+          ${previews.lembar3}
+        </div>
+      </div>
+    `;
+  } else if (currentJenisSurat === 'sk_panitia') {
+    // Untuk SK Panitia, tampilkan 2 lembar
+    previewContainer.innerHTML = `
+      <div id="preview1" class="preview">
+        <div class="paper" id="paperContent1">
+          ${previews.lembar1}
+        </div>
+      </div>
+      <div id="preview2" class="preview">
+        <div class="paper" id="paperContent2">
+          ${previews.lembar2}
+        </div>
+      </div>
+    `;
+  } else if (currentJenisSurat === 'surat_edaran') {
+    // Untuk Surat Edaran, tampilkan 1 lembar
+    previewContainer.innerHTML = `
+      <div id="preview1" class="preview">
+        <div class="paper" id="paperContent1">
+          ${previews.lembar1}
+        </div>
+      </div>
+    `;
+  }
+}
+
+function toggleForm() {
+  const formContainer = document.getElementById('formContainer');
+  const toggleText = document.getElementById('toggleFormText');
+  formContainer.classList.toggle('hidden');
+  if (formContainer.classList.contains('hidden')) {
+    toggleText.textContent = 'Buat Surat';
+  } else {
+    toggleText.textContent = 'Tutup Form';
+  }
+}
+
+// Fungsi-fungsi untuk SK Keputusan
+function addGuruRow(index = null) {
+  if (currentJenisSurat !== 'sk_keputusan') return;
+  
+  const container = document.getElementById('guruTableContainer');
+  if (!container) return;
+  
+  const rowId = index !== null ? index : guruData.length;
+  
+  const rowHtml = `
+    <div class="dynamic-row" id="guruRow${rowId}">
+      <input type="text" placeholder="Nama Guru" id="guruNama${rowId}" oninput="updateGuruData(${rowId})">
+      <input type="text" placeholder="Mata Pelajaran" id="guruMapel${rowId}" oninput="updateGuruData(${rowId})">
+      <input type="text" placeholder="Kelas" id="guruKelas${rowId}" oninput="updateGuruData(${rowId})">
+      <input type="text" placeholder="JTM" id="guruJtm${rowId}" oninput="updateGuruData(${rowId})">
+      <button type="button" class="remove-row-btn" onclick="removeGuruRow(${rowId})">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+  `;
+  
+  if (index !== null) {
+    const existingRow = document.getElementById(`guruRow${index}`);
+    if (existingRow) {
+      existingRow.outerHTML = rowHtml;
+    }
+  } else {
+    container.insertAdjacentHTML('beforeend', rowHtml);
+    guruData.push({ nama: '', mapel: '', kelas: '', jtm: '' });
+  }
+  
+  debounceUpdate();
+}
+
+function updateGuruData(index) {
+  guruData[index] = {
+    nama: document.getElementById(`guruNama${index}`)?.value || '',
+    mapel: document.getElementById(`guruMapel${index}`)?.value || '',
+    kelas: document.getElementById(`guruKelas${index}`)?.value || '',
+    jtm: document.getElementById(`guruJtm${index}`)?.value || ''
+  };
+  debounceUpdate();
+}
+
+function removeGuruRow(index) {
+  const row = document.getElementById(`guruRow${index}`);
+  if (row) {
+    row.remove();
+    guruData.splice(index, 1);
+    
+    guruData.forEach((guru, i) => {
+      if (i >= index) {
+        addGuruRow(i);
+      }
+    });
+    
+    if (guruData.length === 0) {
+      addGuruRow();
+    }
+  }
+  debounceUpdate();
+}
+
+// Fungsi-fungsi untuk SK Panitia
+function addPengawasRow(index = null) {
+  if (currentJenisSurat !== 'sk_panitia') return;
+  
+  const container = document.getElementById('pengawasTableContainer');
+  if (!container) return;
+  
+  const rowId = index !== null ? index : pengawasData.length;
+  
+  const rowHtml = `
+    <div class="dynamic-row" id="pengawasRow${rowId}">
+      <input type="text" placeholder="Nama Guru" id="pengawasNama${rowId}" oninput="updatePengawasData(${rowId})">
+      <input type="text" placeholder="Jabatan" id="pengawasJabatan${rowId}" oninput="updatePengawasData(${rowId})">
+      <button type="button" class="remove-row-btn" onclick="removePengawasRow(${rowId})">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+  `;
+  
+  if (index !== null) {
+    const existingRow = document.getElementById(`pengawasRow${index}`);
+    if (existingRow) {
+      existingRow.outerHTML = rowHtml;
+    }
+  } else {
+    container.insertAdjacentHTML('beforeend', rowHtml);
+    pengawasData.push({ nama: '', jabatan: '' });
+  }
+  
+  debounceUpdate();
+}
+
+function updatePengawasData(index) {
+  pengawasData[index] = {
+    nama: document.getElementById(`pengawasNama${index}`)?.value || '',
+    jabatan: document.getElementById(`pengawasJabatan${index}`)?.value || ''
+  };
+  debounceUpdate();
+}
+
+function removePengawasRow(index) {
+  const row = document.getElementById(`pengawasRow${index}`);
+  if (row) {
+    row.remove();
+    pengawasData.splice(index, 1);
+    
+    pengawasData.forEach((pengawas, i) => {
+      if (i >= index) {
+        addPengawasRow(i);
+      }
+    });
+    
+    if (pengawasData.length === 0) {
+      addPengawasRow();
+    }
+  }
+  debounceUpdate();
+}
+
+// Fungsi-fungsi untuk Surat Edaran
+function addBiayaRow(index = null) {
+  if (currentJenisSurat !== 'surat_edaran') return;
+  
+  const container = document.getElementById('biayaTableContainer');
+  if (!container) return;
+  
+  const rowId = index !== null ? index : biayaData.length;
+  
+  const rowHtml = `
+    <div class="dynamic-row" id="biayaRow${rowId}">
+      <input type="text" placeholder="Rincian Biaya" id="biayaRincian${rowId}" oninput="updateBiayaData(${rowId})">
+      <input type="text" placeholder="Kelas X" id="biayaKelasX${rowId}" oninput="updateBiayaData(${rowId})">
+      <input type="text" placeholder="Kelas XI" id="biayaKelasXI${rowId}" oninput="updateBiayaData(${rowId})">
+      <input type="text" placeholder="Kelas XII" id="biayaKelasXII${rowId}" oninput="updateBiayaData(${rowId})">
+      <button type="button" class="remove-row-btn" onclick="removeBiayaRow(${rowId})">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+  `;
+  
+  if (index !== null) {
+    const existingRow = document.getElementById(`biayaRow${index}`);
+    if (existingRow) {
+      existingRow.outerHTML = rowHtml;
+    }
+  } else {
+    container.insertAdjacentHTML('beforeend', rowHtml);
+    biayaData.push({ rincian: '', kelas_x: '', kelas_xi: '', kelas_xii: '' });
+  }
+  
+  debounceUpdate();
+}
+
+function updateBiayaData(index) {
+  biayaData[index] = {
+    rincian: document.getElementById(`biayaRincian${index}`)?.value || '',
+    kelas_x: document.getElementById(`biayaKelasX${index}`)?.value || '',
+    kelas_xi: document.getElementById(`biayaKelasXI${index}`)?.value || '',
+    kelas_xii: document.getElementById(`biayaKelasXII${index}`)?.value || ''
+  };
+  debounceUpdate();
+}
+
+function removeBiayaRow(index) {
+  const row = document.getElementById(`biayaRow${index}`);
+  if (row) {
+    row.remove();
+    biayaData.splice(index, 1);
+    
+    biayaData.forEach((biaya, i) => {
+      if (i >= index) {
+        addBiayaRow(i);
+      }
+    });
+    
+    if (biayaData.length === 0) {
+      addBiayaRow();
+    }
+  }
+  debounceUpdate();
+}
+
+// Fungsi tab navigation
+function showTab(tabNumber) {
+  if (currentJenisSurat !== 'sk_keputusan') return;
+  
+  document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+  
+  document.querySelector(`.tab-button:nth-child(${tabNumber})`).classList.add('active');
+  document.getElementById(`tab${tabNumber}`).classList.add('active');
+}
+
+function showTabPanitia(tabNumber) {
+  if (currentJenisSurat !== 'sk_panitia') return;
+  
+  document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+  
+  document.querySelector(`.tab-button:nth-child(${tabNumber})`).classList.add('active');
+  document.getElementById(`tabPanitia${tabNumber}`).classList.add('active');
+}
+
+// Fungsi-fungsi umum
+function debounceUpdate() {
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(() => {
+    updatePreview();
+  }, 300);
+}
+
+// Fungsi cetak dengan konfirmasi
+function printDocument() {
+  const previews = document.querySelectorAll('.preview');
+  if (previews.length === 0) {
+    showNotification('Tidak ada preview untuk dicetak! Silakan isi data terlebih dahulu.');
+    return;
+  }
+  
+  // Cek apakah ada data kosong
+  let isEmpty = false;
+  if (currentJenisSurat === 'sk_keputusan') {
+    if (!document.getElementById('nomor_surat')?.value || 
+        !document.getElementById('tanggal_surat')?.value ||
+        !document.getElementById('tahun_pelajaran')?.value) {
+      isEmpty = true;
+    }
+  } else if (currentJenisSurat === 'sk_panitia') {
+    if (!document.getElementById('nomor_surat_panitia')?.value || 
+        !document.getElementById('tanggal_surat_panitia')?.value ||
+        !document.getElementById('nama_kegiatan')?.value ||
+        !document.getElementById('tahun_kegiatan')?.value) {
+      isEmpty = true;
+    }
+  } else if (currentJenisSurat === 'surat_edaran') {
+    if (!document.getElementById('nomor_edaran')?.value || 
+        !document.getElementById('tanggal_edaran')?.value ||
+        !document.getElementById('tahun_pelajaran_edaran')?.value ||
+        !document.getElementById('tanggal_mulai_pembayaran')?.value ||
+        !document.getElementById('tanggal_akhir_pembayaran')?.value ||
+        !document.getElementById('metode_pembayaran')?.value) {
+      isEmpty = true;
+    }
+  }
+  
+  if (isEmpty) {
+    showNotification('Harap isi semua data yang diperlukan sebelum mencetak!');
+    return;
+  }
+  
+  document.getElementById('printModal').style.display = 'flex';
+}
+
+function hidePrintModal() {
+  document.getElementById('printModal').style.display = 'none';
+}
+
+function printAllPreviews() {
+  hidePrintModal();
+  
+  const previews = document.querySelectorAll('.preview');
+  
+  if (previews.length === 0) {
+    showNotification('Tidak ada preview untuk dicetak!');
+    return;
+  }
+  
+  const pdf = new window.jspdf.jsPDF('p', 'mm', 'a4');
+  
+  // Generate each page
+  previews.forEach((preview, index) => {
+    if (index > 0) {
+      pdf.addPage();
+    }
+    
+    html2canvas(preview, { 
+      scale: 2,
+      useCORS: true,
+      allowTaint: true,
+      backgroundColor: '#fdfdf8'
+    }).then(canvas => {
+      const imgData = canvas.toDataURL('image/jpeg', 1.0);
+      const imgWidth = 210;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      
+      pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight);
+      
+      if (index === previews.length - 1) {
+        const nomorSurat = document.getElementById('nomor_surat')?.value || 
+                          document.getElementById('nomor_surat_panitia')?.value || 
+                          document.getElementById('nomor_edaran')?.value || 
+                          Date.now();
+        const jenisSurat = currentJenisSurat === 'sk_keputusan' ? 'SK_Keputusan' : 
+                         currentJenisSurat === 'sk_panitia' ? 'SK_Panitia' : 'Surat_Edaran';
+        pdf.save(`${jenisSurat}_${nomorSurat.replace(/\//g, '-')}.pdf`);
+        showNotification('Surat berhasil dicetak!');
+      }
+    }).catch(error => {
+      console.error('Error generating PDF:', error);
+      showNotification('Terjadi kesalahan saat mencetak. Silakan coba lagi.');
+    });
+  });
+}
+
+function handleLogoUpload(event) {
+  const file = event.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      logoDataUrl = e.target.result;
+      const logoPreview = document.getElementById('logoPreview');
+      logoPreview.innerHTML = `<img src="${logoDataUrl}" alt="Logo">`;
+      updatePreview();
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
+function saveIdentitasSekolah() {
+  const data = {
+    nama_sekolah: document.getElementById('nama_sekolah').value,
+    kecamatan: document.getElementById('kecamatan').value,
+    yayasan: document.getElementById('yayasan').value,
+    nama_kepala_sekolah: document.getElementById('nama_kepala_sekolah').value,
+    tempat_ttd: document.getElementById('tempat_ttd').value,
+    logoDataUrl: logoDataUrl
+  };
+  
+  localStorage.setItem(IDENTITAS_KEY, JSON.stringify(data));
+  showNotification('Identitas Sekolah berhasil disimpan!');
+}
+
+function loadIdentitasSekolah() {
+  const saved = localStorage.getItem(IDENTITAS_KEY);
+  if (saved) {
+    const data = JSON.parse(saved);
+    document.getElementById('nama_sekolah').value = data.nama_sekolah || '';
+    document.getElementById('kecamatan').value = data.kecamatan || '';
+    document.getElementById('yayasan').value = data.yayasan || '';
+    document.getElementById('nama_kepala_sekolah').value = data.nama_kepala_sekolah || '';
+    document.getElementById('tempat_ttd').value = data.tempat_ttd || 'Rajabasa Baru';
+    
+    if (data.logoDataUrl) {
+      logoDataUrl = data.logoDataUrl;
+      document.getElementById('logoPreview').innerHTML = `<img src="${logoDataUrl}" alt="Logo">`;
+    }
+  }
+}
+
+function showNotification(message) {
+  const notification = document.createElement('div');
+  notification.className = 'notification';
+  notification.textContent = message;
+  document.body.appendChild(notification);
+  
+  setTimeout(() => {
+    notification.remove();
+  }, 3000);
+}
+
+// --- INITIALIZATION ---
+document.addEventListener('DOMContentLoaded', function() {
+  loadIdentitasSekolah();
+  
+  // Set default date untuk form yang aktif
+  const today = new Date();
+  const options = { day: 'numeric', month: 'long', year: 'numeric' };
+  const tanggalDefault = today.toLocaleDateString('id-ID', options);
+  
+  // Inisialisasi form pertama
+  renderForm();
+  updatePreview();
+  
+  // Set tanggal default setelah form dirender
+  setTimeout(() => {
+    const tanggalInput = document.getElementById('tanggal_surat');
+    if (tanggalInput && !tanggalInput.value) {
+      tanggalInput.value = tanggalDefault;
+    }
+    
+    const tanggalPanitiaInput = document.getElementById('tanggal_surat_panitia');
+    if (tanggalPanitiaInput && !tanggalPanitiaInput.value) {
+      tanggalPanitiaInput.value = tanggalDefault;
+    }
+    
+    const tanggalEdaranInput = document.getElementById('tanggal_edaran');
+    if (tanggalEdaranInput && !tanggalEdaranInput.value) {
+      tanggalEdaranInput.value = tanggalDefault;
+    }
+    
+    // Set default year untuk SK Keputusan
+    const tahunInput = document.getElementById('tahun_pelajaran');
+    if (tahunInput && !tahunInput.value) {
+      const year = today.getFullYear();
+      tahunInput.value = `${year}/${year + 1}`;
+    }
+    
+    // Set default year untuk SK Panitia
+    const tahunKegiatanInput = document.getElementById('tahun_kegiatan');
+    if (tahunKegiatanInput && !tahunKegiatanInput.value) {
+      tahunKegiatanInput.value = today.getFullYear().toString();
+    }
+    
+    // Set default year untuk Surat Edaran
+    const tahunEdaranInput = document.getElementById('tahun_pelajaran_edaran');
+    if (tahunEdaranInput && !tahunEdaranInput.value) {
+      const year = today.getFullYear();
+      tahunEdaranInput.value = `${year}/${year + 1}`;
+    }
+    
+    updatePreview();
+  }, 100);
+});
+</script>
+</body>
+</html>
