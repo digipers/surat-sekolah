@@ -2,17 +2,14 @@
 <html lang="id">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Aplikasi Pembuat Surat Sekolah</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes" />
+<title>Aplikasi Pembuat Surat Sekolah - MA Ash-Shidiqi</title>
 <!-- Google Fonts: Poppins -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 <!-- Font Awesome for Icons -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-<!-- jsPDF and html2canvas for Backup Feature -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
 <style>
   :root {
@@ -110,6 +107,7 @@
   
   .form-group {
     margin-bottom: 15px;
+    position: relative;
   }
   .form-group label {
     display: block;
@@ -127,9 +125,17 @@
   .form-group.has-error textarea,
   .form-group.has-error select {
     border-color: var(--error);
+    background-color: rgba(211, 47, 47, 0.05);
   }
   .form-group.has-error .error-message {
     display: block;
+  }
+  
+  /* Required field indicator */
+  label.required::after {
+    content: " *";
+    color: var(--error);
+    font-weight: bold;
   }
 
   /* CONTENT */
@@ -203,14 +209,6 @@
     border-color: var(--primary-dark);
     color: var(--primary-dark);
   }
-  
-  .btn-danger {
-    background: var(--error);
-    color: var(--surface);
-  }
-  .btn-danger:hover {
-    background: #b71c1c;
-  }
 
   /* Form Container */
   .form-container {
@@ -229,6 +227,7 @@
     display: flex;
     gap: 20px;
     flex-wrap: wrap;
+    justify-content: center;
   }
 
   /* PREVIEW (kertas legal) */
@@ -244,35 +243,23 @@
     width: 21.59cm;
     min-height: 35.56cm;
     margin: 0 auto 30px auto;
-    padding: 1.5cm 2.5cm 3cm 2.5cm;
+    padding: 1.5cm 2.5cm 2cm 2.5cm;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     position: relative;
     text-align: left;
     page-break-after: always;
   }
 
-  .preview::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%) rotate(-45deg);
-    font-size: 100px;
-    color: rgba(0, 0, 0, 0.05);
-    font-weight: 700;
-    white-space: nowrap;
-    pointer-events: none;
-  }
-
   .paper {
     font-family: "Times New Roman", Times, serif;
     font-size: 12pt;
-    line-height: 1; /* UBAH DARI 1.6 MENJADI 1 */
+    line-height: 1.5;
     color: #000;
     position: relative;
     z-index: 1;
   }
 
+  /* Kop Surat Baru - YAYASAN ASH SHIDIQI MATARAM BARU */
   .letterhead {
     display: flex;
     align-items: center;
@@ -281,18 +268,18 @@
     padding-bottom: 15px;
   }
   .letterhead .logo-placeholder {
-    width: 70px;
-    height: 90px;
+    width: 80px;
+    height: 80px;
     background: #ddd;
-    border-radius: 0%;
     margin-right: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 30px;
+    font-size: 40px;
     color: #777;
     overflow: hidden;
     flex-shrink: 0;
+    border-radius: 0;
   }
   .letterhead .logo-placeholder img {
     width: 100%;
@@ -305,11 +292,29 @@
   }
   .letterhead .letterhead-text p {
     margin: 2px 0;
-    line-height: 1; /* UBAH MENJADI 1 */
+    line-height: 1.3;
     font-weight: bold;
   }
-  .letterhead h1 { margin: 0; font-size: 18px; font-weight: bold; }
-  .letterhead p { margin: 2px 0; font-size: 11px; line-height: 1; } /* TAMBAH line-height: 1 */
+  .letterhead h1 { 
+    margin: 0; 
+    font-size: 20px; 
+    font-weight: bold; 
+    text-transform: uppercase;
+  }
+  .letterhead .yayasan {
+    font-size: 16px;
+    letter-spacing: 1px;
+  }
+  .letterhead .sekolah {
+    font-size: 18px;
+    margin: 5px 0;
+  }
+  .letterhead .alamat {
+    font-size: 10px;
+    font-style: italic;
+    margin-top: 8px;
+    font-weight: normal;
+  }
 
   .paper .center { text-align: center; }
   .paper .u { text-decoration: underline; }
@@ -330,7 +335,7 @@
     padding: 8px;
     text-align: left;
     vertical-align: top;
-    line-height: 1; /* TAMBAH line-height: 1 */
+    line-height: 1.5;
   }
   
   /* Tabel 3 kolom tanpa garis untuk bagian menimbang dan mengingat */
@@ -345,7 +350,7 @@
     border: none;
     padding: 5px 8px;
     vertical-align: top;
-    line-height: 1; /* TAMBAH line-height: 1 */
+    line-height: 1.5;
   }
   
   .paper table.tiga-kolom td:first-child {
@@ -378,7 +383,7 @@
     border: 1px solid #000;
     padding: 8px;
     text-align: center;
-    line-height: 1; /* TAMBAH line-height: 1 */
+    line-height: 1.5;
   }
   
   .paper table.dengan-garis th {
@@ -426,12 +431,31 @@
   /* Responsive */
   @media (max-width: 1200px) {
     .sidebar { width: 320px; }
-    .preview { transform: scale(0.8); transform-origin: top center; margin-bottom: -20%; }
+    .preview { 
+      transform: scale(0.7); 
+      transform-origin: top center; 
+      margin-bottom: -20%; 
+      width: 21.59cm;
+      height: auto;
+    }
   }
   @media (max-width: 1000px) {
     .app { flex-direction: column; }
     .sidebar { width: 100%; }
-    .preview { transform: none; width: 100%; max-width: 500px; height: auto; margin: 0 auto; }
+    .content { padding: 15px; }
+    .panel { height: auto; }
+    .preview { 
+      transform: none; 
+      width: 100%; 
+      padding: 1cm;
+      min-height: auto;
+      margin: 0 auto; 
+    }
+  }
+  @media (max-width: 768px) {
+    .panel-header { flex-direction: column; align-items: flex-start; }
+    .preview-actions { width: 100%; justify-content: flex-start; }
+    .preview { padding: 0.8cm; }
   }
 
   /* Tab Navigation */
@@ -439,6 +463,7 @@
     display: flex;
     border-bottom: 1px solid var(--border);
     margin-bottom: 20px;
+    flex-wrap: wrap;
   }
   
   .tab-button {
@@ -475,10 +500,12 @@
     align-items: center;
     gap: 10px;
     margin-bottom: 10px;
+    flex-wrap: wrap;
   }
   
   .dynamic-row input {
-    flex: 1;
+    flex: 1 1 150px;
+    min-width: 120px;
   }
   
   .remove-row-btn {
@@ -486,12 +513,13 @@
     color: white;
     border: none;
     border-radius: 4px;
-    width: 30px;
-    height: 30px;
+    width: 36px;
+    height: 36px;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
   }
   
   .add-row-btn {
@@ -507,39 +535,109 @@
     margin-top: 10px;
   }
 
-  /* Right align untuk penandatanganan dan tempat tanggal */
-  .penandatanganan-kanan {
-    text-align: right;
-    margin-top: 120px;
+  /* ============ TANDA TANGAN DI KANAN BAWAH (SURAT RESMI) ============ */
+  .signature-right-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    width: 100%;
+    margin-top: 40px;
   }
   
   .tempat-tanggal-kanan {
-    text-align: right;
-    margin-top: 60px;
-    margin-bottom: 20px;
+    text-align: left;
+    width: 50%;
+    margin-bottom: 10px;
+    margin-right: 0;
   }
   
   .tempat-tanggal-kanan p {
-    margin: 5px 0;
-    line-height: 1; /* UBAH MENJADI 1 */
+    margin: 0;
+    line-height: 1.5;
+    text-align: left;
+  }
+  
+  .penandatanganan-kanan {
+    text-align: center;
+    width: 50%;
+    margin-top: 0;
+  }
+  
+  .penandatanganan-kanan p {
+    margin: 0;
+    line-height: 1.5;
+  }
+  
+  .penandatanganan-kanan .jabatan {
+    margin-bottom: 5px;
+  }
+  
+  .penandatanganan-kanan .nama {
+    margin-top: 15px;
+    margin-bottom: 2px;
+  }
+  
+  .penandatanganan-kanan .nip {
+    margin-top: 2px;
+  }
+  /* ================================================================ */
+  
+  /* Judul Lampiran di kiri atas */
+  .lampiran-header {
+    text-align: left;
+    margin-bottom: 20px;
+  }
+  
+  .lampiran-header h3 {
+    text-decoration: underline;
+    margin-bottom: 5px;
+    font-size: 14pt;
+  }
+  
+  .lampiran-header p {
+    margin: 2px 0;
+    line-height: 1.4;
   }
 
-  /* Select jenis surat styling */
-  #jenisSurat {
-    font-size: 14px;
-    font-weight: 500;
-    border: 2px solid var(--primary);
+  /* Print button */
+  .print-btn {
+    background: #4CAF50;
+    color: white;
+  }
+  .print-btn:hover {
+    background: #45a049;
+  }
+  
+  /* Loading spinner */
+  .loading {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 50%;
+    border-top-color: white;
+    animation: spin 1s ease-in-out infinite;
+  }
+  
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  
+  /* Fieldset styling */
+  fieldset {
+    border: 1px solid var(--primary-light);
     border-radius: 8px;
-    background-color: white;
+    padding: 15px;
+    margin-bottom: 20px;
   }
   
-  /* Panel header layout */
-  .panel-header > div:first-child {
-    flex: 1;
-    min-width: 300px;
+  legend {
+    font-weight: 600;
+    color: var(--primary-dark);
+    padding: 0 10px;
   }
   
-  /* Styling untuk notification */
+  /* Notification */
   .notification {
     position: fixed;
     bottom: 20px;
@@ -569,6 +667,11 @@
 
 <div class="app">
   <aside class="sidebar">
+    <div class="brand">
+      <i class="fas fa-school"></i> MA Ash-Shidiqi
+    </div>
+    <p class="sub">Aplikasi Pembuatan Surat Sekolah</p>
+    
     <div class="menu">
       <div class="section-title">Identitas Sekolah</div>
       <div class="logo-upload">
@@ -576,36 +679,62 @@
           <i class="fas fa-school" style="color: #999;"></i>
         </div>
         <div>
-          <input type="file" id="logoInput" accept="image/*" style="display: none;" onchange="handleLogoUpload(event)">
+          <input type="file" id="logoInput" accept="image/*" style="display: none;">
           <button type="button" class="logo-upload-btn" onclick="document.getElementById('logoInput').click()">
             <i class="fas fa-upload"></i> Upload Logo
           </button>
+          <button type="button" class="logo-upload-btn" onclick="removeLogo()" style="margin-left: 5px; background: rgba(211, 47, 47, 0.3);">
+            <i class="fas fa-times"></i> Hapus
+          </button>
         </div>
       </div>
+      
       <div class="form-group">
-        <label for="nama_sekolah">Nama Sekolah *</label>
-        <input id="nama_sekolah" type="text" oninput="updateAllPreviews()" required>
+        <label for="yayasan" class="required">Yayasan</label>
+        <input id="yayasan" type="text" placeholder="YAYASAN ASH SHIDIQI MATARAM BARU" value="YAYASAN ASH SHIDIQI MATARAM BARU" oninput="updateAllPreviews()">
+        <span class="error-message">Yayasan harus diisi.</span>
+      </div>
+      
+      <div class="form-group">
+        <label for="nama_sekolah" class="required">Nama Sekolah</label>
+        <input id="nama_sekolah" type="text" placeholder="MA. ASH-SHIDIQI RAJABASA BARU" value="MA. ASH-SHIDIQI RAJABASA BARU" oninput="updateAllPreviews()" required>
         <span class="error-message">Nama sekolah harus diisi.</span>
       </div>
+	  
       <div class="form-group">
-        <label for="kecamatan">Kecamatan *</label>
-        <input id="kecamatan" type="text" oninput="updateAllPreviews()" required>
+        <label for="kecamatan" class="required">Kecamatan</label>
+        <input id="kecamatan" type="text" placeholder="MATARAM BARU" value="MATARAM BARU" oninput="updateAllPreviews()" required>
         <span class="error-message">Kecamatan harus diisi.</span>
       </div>
+      
       <div class="form-group">
-        <label for="yayasan">Yayasan</label>
-        <input id="yayasan" type="text" oninput="updateAllPreviews()">
+        <label for="kabupaten" class="required">Kabupaten</label>
+        <input id="kabupaten" type="text" placeholder="LAMPUNG TIMUR" value="LAMPUNG TIMUR" oninput="updateAllPreviews()" required>
+        <span class="error-message">Kabupaten harus diisi.</span>
       </div>
+      
       <div class="form-group">
-        <label for="nama_kepala_sekolah">Nama Kepala Sekolah *</label>
-        <input id="nama_kepala_sekolah" type="text" oninput="updateAllPreviews()" required>
+        <label for="alamat_lengkap">Alamat Lengkap</label>
+        <textarea id="alamat_lengkap" rows="2" placeholder="Srirejo Agung, Rajabasa Baru, Kecamatan Mataram Baru, Kabupaten Lampung Timur 34199" oninput="updateAllPreviews()">Srirejo Agung, Rajabasa Baru, Kecamatan Mataram Baru, Kabupaten Lampung Timur 34199</textarea>
+      </div>
+     
+      <div class="form-group">
+        <label for="nama_kepala_sekolah" class="required">Nama Kepala Sekolah</label>
+        <input id="nama_kepala_sekolah" type="text" placeholder="Nama Kepala Sekolah" oninput="updateAllPreviews()" required>
         <span class="error-message">Nama kepala sekolah harus diisi.</span>
       </div>
+      
       <div class="form-group">
-        <label for="tempat_ttd">Tempat Penandatanganan *</label>
+        <label for="tempat_ttd" class="required">Tempat Penandatanganan</label>
         <input id="tempat_ttd" type="text" value="Rajabasa Baru" oninput="updateAllPreviews()" required>
         <span class="error-message">Tempat penandatanganan harus diisi.</span>
       </div>
+      
+      <div class="form-group">
+        <label for="nip_kepala_sekolah">NIP Kepala Sekolah</label>
+        <input id="nip_kepala_sekolah" type="text" placeholder="NIP. ................................." oninput="updateAllPreviews()">
+      </div>
+      
       <button type="button" class="btn btn-prim" style="width: 100%; margin-top: 10px;" onclick="saveIdentitasSekolah()">
         <i class="fas fa-save"></i> Simpan Identitas Sekolah
       </button>
@@ -616,17 +745,18 @@
     <div class="panel">
       <div class="panel-header">
         <div style="flex: 1;">
-          <select id="jenisSurat" onchange="handleJenisSuratChange()" style="width: 360px; padding: 10px;">
+          <select id="jenisSurat" onchange="handleJenisSuratChange()" style="width: 100%; max-width: 360px; padding: 10px;">
             <option value="sk_keputusan">1. Surat Keputusan Kepala Sekolah</option>
             <option value="sk_panitia">2. SK Panitia</option>
             <option value="surat_edaran">3. Surat Edaran Biaya Sekolah</option>
+            <option value="surat_pemanggilan">4. Surat Pemanggilan Orang Tua/Wali Siswa</option>
           </select>
         </div>
         <div class="preview-actions">
           <button type="button" class="btn btn-outline" onclick="toggleForm()">
             <i class="fas fa-edit"></i> <span id="toggleFormText">Buat Surat</span>
           </button>
-          <button type="button" class="btn btn-prim" onclick="printDocument()">
+          <button type="button" class="btn print-btn" onclick="printDocument()">
             <i class="fas fa-print"></i> Cetak
           </button>
         </div>
@@ -651,12 +781,16 @@
 <div id="printModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
   <div style="background: white; padding: 30px; border-radius: 10px; max-width: 500px; width: 90%;">
     <h3 style="margin-bottom: 20px; color: var(--primary);">Konfirmasi Cetak</h3>
-    <p style="margin-bottom: 15px;">Apakah Anda yakin ingin mencetak surat?</p>
-    <p style="margin-bottom: 20px; font-size: 14px; color: var(--text-muted);">Pastikan semua data sudah terisi dengan benar sebelum mencetak.</p>
+    <p style="margin-bottom: 15px;">Pilih opsi cetak:</p>
+    
+    <div style="display: flex; gap: 10px; flex-direction: column; margin-bottom: 20px;">
+      <button type="button" class="btn btn-prim" onclick="printAllPreviews(true)">
+        <i class="fas fa-print"></i> Cetak Preview di Browser
+      </button>
+    </div>
     
     <div style="display: flex; gap: 10px; justify-content: flex-end;">
       <button type="button" class="btn btn-outline" onclick="hidePrintModal()">Batal</button>
-      <button type="button" class="btn btn-prim" onclick="printAllPreviews()">Ya, Cetak</button>
     </div>
   </div>
 </div>
@@ -670,6 +804,7 @@ let logoDataUrl = null;
 let guruData = []; // Untuk SK Keputusan
 let pengawasData = []; // Untuk SK Panitia
 let biayaData = []; // Untuk Surat Edaran
+let pemanggilanData = {}; // Untuk Surat Pemanggilan
 
 // --- FORM TEMPLATES ---
 const formTemplates = {
@@ -684,18 +819,18 @@ const formTemplates = {
       <form id="suratForm">
         <fieldset>
           <legend>Data Surat Keputusan</legend>
-          <div style="display: flex; gap: 16px; margin-bottom: 15px;">
-            <div style="flex: 1;">
+          <div style="display: flex; gap: 16px; margin-bottom: 15px; flex-wrap: wrap;">
+            <div style="flex: 1 1 200px;">
               <div class="form-group">
-                <label for="nomor_surat">Nomor Surat *</label>
-                <input id="nomor_surat" type="text" placeholder="Contoh: 001/SK-KS/IX/2023" oninput="debounceUpdate()" required>
+                <label for="nomor_surat" class="required">Nomor Surat</label>
+                <input id="nomor_surat" type="text" placeholder="Contoh: 001/SK-KS/IX/2023" oninput="updatePreview()" required>
                 <span class="error-message">Nomor surat harus diisi.</span>
               </div>
             </div>
-            <div style="flex: 1;">
+            <div style="flex: 1 1 200px;">
               <div class="form-group">
-                <label for="tanggal_surat">Tanggal Surat *</label>
-                <input id="tanggal_surat" type="text" value="" placeholder="Contoh: 25 Oktober 2023" oninput="debounceUpdate()" required>
+                <label for="tanggal_surat" class="required">Tanggal Surat</label>
+                <input id="tanggal_surat" type="text" placeholder="Contoh: 25 Oktober 2023" oninput="updatePreview()" required>
                 <span class="error-message">Tanggal surat harus diisi.</span>
               </div>
             </div>
@@ -703,8 +838,8 @@ const formTemplates = {
           <div style="display: flex; gap: 16px; margin-bottom: 15px;">
             <div style="flex: 1;">
               <div class="form-group">
-                <label for="tahun_pelajaran">Tahun Pelajaran *</label>
-                <input id="tahun_pelajaran" type="text" placeholder="Contoh: 2023/2024" oninput="debounceUpdate()" required>
+                <label for="tahun_pelajaran" class="required">Tahun Pelajaran</label>
+                <input id="tahun_pelajaran" type="text" placeholder="Contoh: 2023/2024" oninput="updatePreview()" required>
                 <span class="error-message">Tahun pelajaran harus diisi.</span>
               </div>
             </div>
@@ -733,47 +868,47 @@ const formTemplates = {
       <div style="margin-left: 20px;">
         <div class="form-group">
           <label for="kepala_madrasah">KEPALA MADRASAH:</label>
-          <input id="kepala_madrasah" type="text" oninput="debounceUpdate()">
+          <input id="kepala_madrasah" type="text" oninput="updatePreview()">
         </div>
         <div class="form-group">
           <label for="waka_kurikulum">WAKA. KURIKULUM:</label>
-          <input id="waka_kurikulum" type="text" oninput="debounceUpdate()">
+          <input id="waka_kurikulum" type="text" oninput="updatePreview()">
         </div>
         <div class="form-group">
           <label for="waka_kesiswaan">WAKA. KESISWAAN:</label>
-          <input id="waka_kesiswaan" type="text" oninput="debounceUpdate()">
+          <input id="waka_kesiswaan" type="text" oninput="updatePreview()">
         </div>
         <div class="form-group">
           <label for="bendahara">BENDAHARA:</label>
-          <input id="bendahara" type="text" oninput="debounceUpdate()">
+          <input id="bendahara" type="text" oninput="updatePreview()">
         </div>
         <div class="form-group">
           <label for="humas">HUMAS:</label>
-          <input id="humas" type="text" oninput="debounceUpdate()">
+          <input id="humas" type="text" oninput="updatePreview()">
         </div>
         <div class="form-group">
           <label for="sarpras">SARPRAS:</label>
-          <input id="sarpras" type="text" oninput="debounceUpdate()">
+          <input id="sarpras" type="text" oninput="updatePreview()">
         </div>
         <div class="form-group">
           <label for="wali_kelas_x">WALI KELAS X:</label>
-          <input id="wali_kelas_x" type="text" oninput="debounceUpdate()">
+          <input id="wali_kelas_x" type="text" oninput="updatePreview()">
         </div>
         <div class="form-group">
           <label for="wali_kelas_xi">WALI KELAS XI:</label>
-          <input id="wali_kelas_xi" type="text" oninput="debounceUpdate()">
+          <input id="wali_kelas_xi" type="text" oninput="updatePreview()">
         </div>
         <div class="form-group">
           <label for="wali_kelas_xii">WALI KELAS XII:</label>
-          <input id="wali_kelas_xii" type="text" oninput="debounceUpdate()">
+          <input id="wali_kelas_xii" type="text" oninput="updatePreview()">
         </div>
         <div class="form-group">
           <label for="operator">OPERATOR:</label>
-          <input id="operator" type="text" oninput="debounceUpdate()">
+          <input id="operator" type="text" oninput="updatePreview()">
         </div>
         <div class="form-group">
           <label for="tata_usaha">TATA USAHA:</label>
-          <input id="tata_usaha" type="text" oninput="debounceUpdate()">
+          <input id="tata_usaha" type="text" oninput="updatePreview()">
         </div>
       </div>
     </div>
@@ -782,37 +917,38 @@ const formTemplates = {
   sk_panitia: `
     <div class="tab-navigation">
       <button type="button" class="tab-button active" onclick="showTabPanitia(1)">Data Utama SK Panitia</button>
-      <button type="button" class="tab-button" onclick="showTabPanitia(2)">Lampiran - Daftar Pengawas</button>
+      <button type="button" class="tab-button" onclick="showTabPanitia(2)">Lampiran 1 - Susunan Panitia</button>
+      <button type="button" class="tab-button" onclick="showTabPanitia(3)">Lampiran 2 - Daftar Pengawas</button>
     </div>
     
     <div id="tabPanitia1" class="tab-content active">
       <form id="suratForm">
         <fieldset>
           <legend>Data Surat Keputusan Panitia</legend>
-          <div style="display: flex; gap: 16px; margin-bottom: 15px;">
-            <div style="flex: 1;">
+          <div style="display: flex; gap: 16px; margin-bottom: 15px; flex-wrap: wrap;">
+            <div style="flex: 1 1 200px;">
               <div class="form-group">
-                <label for="nomor_surat_panitia">Nomor Surat *</label>
-                <input id="nomor_surat_panitia" type="text" placeholder="Contoh: 002/SK-PAN/IX/2023" oninput="debounceUpdate()" required>
+                <label for="nomor_surat_panitia" class="required">Nomor Surat</label>
+                <input id="nomor_surat_panitia" type="text" placeholder="Contoh: 002/SK-PAN/IX/2023" oninput="updatePreview()" required>
                 <span class="error-message">Nomor surat harus diisi.</span>
               </div>
             </div>
-            <div style="flex: 1;">
+            <div style="flex: 1 1 200px;">
               <div class="form-group">
-                <label for="tanggal_surat_panitia">Tanggal Surat *</label>
-                <input id="tanggal_surat_panitia" type="text" placeholder="Contoh: 25 Oktober 2023" oninput="debounceUpdate()" required>
+                <label for="tanggal_surat_panitia" class="required">Tanggal Surat</label>
+                <input id="tanggal_surat_panitia" type="text" placeholder="Contoh: 25 Oktober 2023" oninput="updatePreview()" required>
                 <span class="error-message">Tanggal surat harus diisi.</span>
               </div>
             </div>
           </div>
           <div class="form-group">
-            <label for="nama_kegiatan">Nama Kegiatan *</label>
-            <input id="nama_kegiatan" type="text" placeholder="Contoh: Ujian Tengah Semester" oninput="debounceUpdate()" required>
+            <label for="nama_kegiatan" class="required">Nama Kegiatan</label>
+            <input id="nama_kegiatan" type="text" placeholder="Contoh: Ujian Tengah Semester" oninput="updatePreview(); updateSusunanPanitiaPreview()" required>
             <span class="error-message">Nama kegiatan harus diisi.</span>
           </div>
           <div class="form-group">
-            <label for="tahun_kegiatan">Tahun Kegiatan *</label>
-            <input id="tahun_kegiatan" type="text" placeholder="Contoh: 2023" oninput="debounceUpdate()" required>
+            <label for="tahun_kegiatan" class="required">Tahun Kegiatan</label>
+            <input id="tahun_kegiatan" type="text" placeholder="Contoh: 2023" oninput="updatePreview(); updateSusunanPanitiaPreview()" required>
             <span class="error-message">Tahun kegiatan harus diisi.</span>
           </div>
         </fieldset>
@@ -820,28 +956,51 @@ const formTemplates = {
         <fieldset>
           <legend>Susunan Panitia</legend>
           <div class="form-group">
-            <label for="ketua_panitia">Ketua Panitia *</label>
-            <input id="ketua_panitia" type="text" placeholder="Nama Ketua Panitia" oninput="debounceUpdate()" required>
+            <label for="ketua_panitia" class="required">Ketua Panitia</label>
+            <input id="ketua_panitia" type="text" placeholder="Nama Ketua Panitia" oninput="updatePreview(); updateSusunanPanitiaPreview()" required>
+            <span class="error-message">Ketua panitia harus diisi.</span>
           </div>
           <div class="form-group">
             <label for="wakil_ketua">Wakil Ketua</label>
-            <input id="wakil_ketua" type="text" placeholder="Nama Wakil Ketua" oninput="debounceUpdate()">
+            <input id="wakil_ketua" type="text" placeholder="Nama Wakil Ketua" oninput="updatePreview(); updateSusunanPanitiaPreview()">
           </div>
           <div class="form-group">
-            <label for="sekretaris">Sekretaris *</label>
-            <input id="sekretaris" type="text" placeholder="Nama Sekretaris" oninput="debounceUpdate()" required>
+            <label for="sekretaris" class="required">Sekretaris</label>
+            <input id="sekretaris" type="text" placeholder="Nama Sekretaris" oninput="updatePreview(); updateSusunanPanitiaPreview()" required>
+            <span class="error-message">Sekretaris harus diisi.</span>
           </div>
           <div class="form-group">
-            <label for="bendahara_panitia">Bendahara *</label>
-            <input id="bendahara_panitia" type="text" placeholder="Nama Bendahara" oninput="debounceUpdate()" required>
+            <label for="bendahara_panitia" class="required">Bendahara</label>
+            <input id="bendahara_panitia" type="text" placeholder="Nama Bendahara" oninput="updatePreview(); updateSusunanPanitiaPreview()" required>
+            <span class="error-message">Bendahara harus diisi.</span>
+          </div>
+          <div class="form-group">
+            <label for="anggota_panitia">Anggota Panitia (pisahkan dengan koma)</label>
+            <textarea id="anggota_panitia" rows="3" placeholder="Contoh: Budi Santoso, Siti Aminah, Ahmad Fauzi" oninput="updatePreview(); updateSusunanPanitiaPreview()"></textarea>
           </div>
         </fieldset>
       </form>
     </div>
     
     <div id="tabPanitia2" class="tab-content">
-      <h4>Daftar Pengawas</h4>
-      <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">Isi data pengawas untuk lampiran</p>
+      <h4>Susunan Panitia (Lampiran 1)</h4>
+      <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">Susunan panitia akan muncul di lampiran 1</p>
+      
+      <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+        <h5>Preview Susunan Panitia:</h5>
+        <div id="susunanPanitiaPreview" style="margin-top: 10px;">
+          <p><strong>Ketua:</strong> <span id="previewKetua">-</span></p>
+          <p><strong>Wakil Ketua:</strong> <span id="previewWakil">-</span></p>
+          <p><strong>Sekretaris:</strong> <span id="previewSekretaris">-</span></p>
+          <p><strong>Bendahara:</strong> <span id="previewBendahara">-</span></p>
+          <p><strong>Anggota:</strong> <span id="previewAnggota">-</span></p>
+        </div>
+      </div>
+    </div>
+    
+    <div id="tabPanitia3" class="tab-content">
+      <h4>Daftar Pengawas (Lampiran 2)</h4>
+      <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">Isi data pengawas untuk lampiran 2</p>
       
       <div id="pengawasTableContainer">
         <!-- Dynamic rows will be added here -->
@@ -857,40 +1016,40 @@ const formTemplates = {
     <form id="suratForm">
       <fieldset>
         <legend>Data Surat Edaran</legend>
-        <div style="display: flex; gap: 16px; margin-bottom: 15px;">
-          <div style="flex: 1;">
+        <div style="display: flex; gap: 16px; margin-bottom: 15px; flex-wrap: wrap;">
+          <div style="flex: 1 1 200px;">
             <div class="form-group">
-              <label for="nomor_edaran">Nomor Surat *</label>
-              <input id="nomor_edaran" type="text" placeholder="Contoh: 001/SE/IX/2023" oninput="debounceUpdate()" required>
+              <label for="nomor_edaran" class="required">Nomor Surat</label>
+              <input id="nomor_edaran" type="text" placeholder="Contoh: 001/SE/IX/2023" oninput="updatePreview()" required>
               <span class="error-message">Nomor surat harus diisi.</span>
             </div>
           </div>
-          <div style="flex: 1;">
+          <div style="flex: 1 1 200px;">
             <div class="form-group">
-              <label for="tanggal_edaran">Tanggal Surat *</label>
-              <input id="tanggal_edaran" type="text" placeholder="Contoh: 25 Oktober 2023" oninput="debounceUpdate()" required>
+              <label for="tanggal_edaran" class="required">Tanggal Surat</label>
+              <input id="tanggal_edaran" type="text" placeholder="Contoh: 25 Oktober 2023" oninput="updatePreview()" required>
               <span class="error-message">Tanggal surat harus diisi.</span>
             </div>
           </div>
         </div>
         <div class="form-group">
-          <label for="tahun_pelajaran_edaran">Tahun Pelajaran *</label>
-          <input id="tahun_pelajaran_edaran" type="text" placeholder="Contoh: 2023/2024" oninput="debounceUpdate()" required>
+          <label for="tahun_pelajaran_edaran" class="required">Tahun Pelajaran</label>
+          <input id="tahun_pelajaran_edaran" type="text" placeholder="Contoh: 2023/2024" oninput="updatePreview()" required>
           <span class="error-message">Tahun pelajaran harus diisi.</span>
         </div>
         <div class="form-group">
-          <label for="tanggal_mulai_pembayaran">Tanggal Mulai Pembayaran *</label>
-          <input id="tanggal_mulai_pembayaran" type="text" placeholder="Contoh: 1 November 2023" oninput="debounceUpdate()" required>
+          <label for="tanggal_mulai_pembayaran" class="required">Tanggal Mulai Pembayaran</label>
+          <input id="tanggal_mulai_pembayaran" type="text" placeholder="Contoh: 1 November 2023" oninput="updatePreview()" required>
           <span class="error-message">Tanggal mulai pembayaran harus diisi.</span>
         </div>
         <div class="form-group">
-          <label for="tanggal_akhir_pembayaran">Tanggal Akhir Pembayaran *</label>
-          <input id="tanggal_akhir_pembayaran" type="text" placeholder="Contoh: 15 November 2023" oninput="debounceUpdate()" required>
+          <label for="tanggal_akhir_pembayaran" class="required">Tanggal Akhir Pembayaran</label>
+          <input id="tanggal_akhir_pembayaran" type="text" placeholder="Contoh: 15 November 2023" oninput="updatePreview()" required>
           <span class="error-message">Tanggal akhir pembayaran harus diisi.</span>
         </div>
         <div class="form-group">
-          <label for="metode_pembayaran">Metode Pembayaran *</label>
-          <input id="metode_pembayaran" type="text" placeholder="Contoh: Bendahara Sekolah/Transfer Rekening" oninput="debounceUpdate()" required>
+          <label for="metode_pembayaran" class="required">Metode Pembayaran</label>
+          <input id="metode_pembayaran" type="text" placeholder="Contoh: Bendahara Sekolah/Transfer Rekening" oninput="updatePreview()" required>
           <span class="error-message">Metode pembayaran harus diisi.</span>
         </div>
       </fieldset>
@@ -906,10 +1065,64 @@ const formTemplates = {
         <i class="fas fa-plus"></i> Tambah Rincian Biaya
       </button>
     </form>
+  `,
+  
+  surat_pemanggilan: `
+    <form id="suratForm">
+      <fieldset>
+        <legend>Data Surat Pemanggilan</legend>
+        <div style="display: flex; gap: 16px; margin-bottom: 15px; flex-wrap: wrap;">
+          <div style="flex: 1 1 200px;">
+            <div class="form-group">
+              <label for="nomor_pemanggilan" class="required">Nomor Surat</label>
+              <input id="nomor_pemanggilan" type="text" placeholder="Contoh: 001/SP/IX/2023" oninput="updatePreview()" required>
+              <span class="error-message">Nomor surat harus diisi.</span>
+            </div>
+          </div>
+          <div style="flex: 1 1 200px;">
+            <div class="form-group">
+              <label for="tanggal_pemanggilan" class="required">Tanggal Surat</label>
+              <input id="tanggal_pemanggilan" type="text" placeholder="Contoh: 25 Oktober 2023" oninput="updatePreview()" required>
+              <span class="error-message">Tanggal surat harus diisi.</span>
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="nama_siswa" class="required">Nama Siswa</label>
+          <input id="nama_siswa" type="text" placeholder="Nama lengkap siswa" oninput="updatePreview()" required>
+          <span class="error-message">Nama siswa harus diisi.</span>
+        </div>
+        <div class="form-group">
+          <label for="kelas_siswa" class="required">Kelas Siswa</label>
+          <input id="kelas_siswa" type="text" placeholder="Contoh: X IPA 1" oninput="updatePreview()" required>
+          <span class="error-message">Kelas siswa harus diisi.</span>
+        </div>
+        <div class="form-group">
+          <label for="hari_tanggal" class="required">Hari/Tanggal Pertemuan</label>
+          <input id="hari_tanggal" type="text" placeholder="Contoh: Senin, 30 Oktober 2023" oninput="updatePreview()" required>
+          <span class="error-message">Hari/tanggal harus diisi.</span>
+        </div>
+        <div class="form-group">
+          <label for="waktu_pertemuan" class="required">Waktu Pertemuan</label>
+          <input id="waktu_pertemuan" type="text" placeholder="Contoh: 08.00 - 10.00 WIB" oninput="updatePreview()" required>
+          <span class="error-message">Waktu pertemuan harus diisi.</span>
+        </div>
+        <div class="form-group">
+          <label for="tempat_pertemuan" class="required">Tempat Pertemuan</label>
+          <input id="tempat_pertemuan" type="text" placeholder="Contoh: Ruang Kepala Sekolah" oninput="updatePreview()" required>
+          <span class="error-message">Tempat pertemuan harus diisi.</span>
+        </div>
+        <div class="form-group">
+          <label for="agenda" class="required">Agenda Pertemuan</label>
+          <textarea id="agenda" rows="3" placeholder="Deskripsi agenda pertemuan" oninput="updatePreview()" required></textarea>
+          <span class="error-message">Agenda harus diisi.</span>
+        </div>
+      </fieldset>
+    </form>
   `
 };
 
-// --- LETTER TEMPLATES ---
+// --- LETTER TEMPLATES dengan Kop Surat Baru dan Tanda Tangan di KANAN BAWAH ---
 const templates = {
   sk_keputusan: data => {
     const guruData = data.guruData || [];
@@ -918,26 +1131,26 @@ const templates = {
       lembar1: `
         <div class="letterhead">
           <div class="logo-placeholder">
-            ${logoDataUrl ? `<img src="${logoDataUrl}" alt="Logo">` : '<i class="fas fa-school"></i>'}
+            ${logoDataUrl ? `<img src="${logoDataUrl}" alt="Logo MA Ash-Shidiqi">` : '<i class="fas fa-school"></i>'}
           </div>
           <div class="letterhead-text">
-            <p style="font-size: 12pt; margin: 0;">${data.yayasan ? data.yayasan.toUpperCase() : 'YAYASAN PENDIDIKAN'}</p>
-            <p style="font-size: 13pt; margin: 0;">KECAMATAN ${data.kecamatan ? data.kecamatan.toUpperCase() : 'KECAMATAN'}</p>
-            <p style="font-size: 14pt; margin: 0;">${data.nama_sekolah ? data.nama_sekolah.toUpperCase() : 'SEKOLAH DASAR'}</p>
-            <p style="font-size: 8pt; margin-top: 5px;">Jl. Raya Lintas Timur No. 03, Kecamatan ${data.kecamatan || '...................'}, Kabupaten ${data.kabupaten || '...................'}</p>
+            <p class="yayasan">${data.yayasan ? data.yayasan.toUpperCase() : 'YAYASAN ASH SHIDIQI MATARAM BARU'}</p>
+            <p class="sekolah"><strong>${data.nama_sekolah ? data.nama_sekolah.toUpperCase() : 'MA. ASH-SHIDIQI RAJABASA BARU'}</strong></p>
+            <p class="alamat">
+              Alamat : ${data.alamat_lengkap || 'Sri Rejo Agung, Rajabasa Baru, Kecamatan Mataram Baru, Kabupaten Lampung Timur 34199'}
+            </p>
           </div>
         </div>
         
         <div class="center" style="margin-bottom: 20px;">
           <h3 class="u">SURAT KEPUTUSAN</h3>
-          <h3 class="u">KEPALA ${data.nama_sekolah ? data.nama_sekolah.toUpperCase() : 'SEKOLAH'}</h3>
-          <p style="font-size: 12pt; text-align: center; margin-top: 0; line-height: 1;">NOMOR : ${data.nomor_surat || '……………………………'}</p>
+          <h3 class="u">KEPALA ${data.nama_sekolah ? data.nama_sekolah.toUpperCase() : 'MA. ASH-SHIDIQI RAJABASA BARU'}</h3>
+          <p style="font-size: 12pt; text-align: center; margin-top: 0; line-height: 1.5;">NOMOR : ${data.nomor_surat || '……………………………'}</p>
         </div>
         
         <div class="center" style="margin-bottom: 30px;">
           <h3 class="u">TENTANG :</h3>
-		    <br>
-          <p style="font-size: 12pt; text-align: center; margin-top: 0; line-height: 1;">
+          <p style="font-size: 12pt; text-align: center; margin-top: 0; line-height: 1.5;">
             PEMBAGIAN TUGAS GURU / STAF / KARYAWAN<br>
             DALAM KEGIATAN PROSES BELAJAR MENGAJAR ATAU BIMBINGAN<br>
             Tahun Pelajaran ${data.tahun_pelajaran || '20…./20….'}
@@ -948,12 +1161,12 @@ const templates = {
           <tr>
             <td>Menimbang</td>
             <td>:</td>
-            <td style="text-align: justify; line-height: 1;">Bahwa dalam rangka memperlancar pelaksanaan proses belajar mengajar di ${data.nama_sekolah || '...................'} perlu menetapkan Pembagian Tugas Guru.</td>
+            <td style="text-align: justify; line-height: 1.5;">Bahwa dalam rangka memperlancar pelaksanaan proses belajar mengajar di ${data.nama_sekolah || 'MA. ASH-SHIDIQI RAJABASA BARU'} perlu menetapkan Pembagian Tugas Guru.</td>
           </tr>
           <tr>
             <td>Mengingat</td>
             <td>:</td>
-            <td style="text-align: justify; line-height: 1;">
+            <td style="text-align: justify; line-height: 1.5;">
               <div style="margin-left: 0;">
                 <div>1. Undang-Undang Nomor 20 Tahun 2003, tentang Sistem Pendidikan Nasional</div>
                 <div>2. Keputusan Menteri Pendidikan Nasional Republik Indonesia Nomor : 118/U/2002, tentang Penyesuaian Garis-Garis Besar Program Pengajaran dan Penilaian pada Sistem Semester.</div>
@@ -973,73 +1186,83 @@ const templates = {
           <tr>
             <td>Menetapkan</td>
             <td>:</td>
-            <td style="text-align: justify; line-height: 1;">Pembagian Tugas Guru Dalam Proses Belajar Mengajar</td>
+            <td style="text-align: justify; line-height: 1.5;">Pembagian Tugas Guru Dalam Proses Belajar Mengajar</td>
           </tr>
           <tr>
             <td>Pertama</td>
             <td>:</td>
-            <td style="text-align: justify; line-height: 1;">Pembagian tugas guru dalam kegiatan belajar mengajar pada tahun pembelajaran seperti tersebut lampiran I Keputusan ini.</td>
+            <td style="text-align: justify; line-height: 1.5;">Pembagian tugas guru dalam kegiatan belajar mengajar pada tahun pembelajaran seperti tersebut lampiran I Keputusan ini.</td>
           </tr>
           <tr>
             <td>Kedua</td>
             <td>:</td>
-            <td style="text-align: justify; line-height: 1;">Memutuskan guru untuk melaksanakan tugas tambahan dan tugas bimbingan seperti tersebut pada lampiran Ke-II Keputusan ini.</td>
+            <td style="text-align: justify; line-height: 1.5;">Memutuskan guru untuk melaksanakan tugas tambahan dan tugas bimbingan seperti tersebut pada lampiran Ke-II Keputusan ini.</td>
           </tr>
           <tr>
             <td>Ketiga</td>
             <td>:</td>
-            <td style="text-align: justify; line-height: 1;">Masing-masing Guru melaporkan pelaksanaan tugasnya secara tertulis dan berkala kepada Kepala Sekolah.</td>
+            <td style="text-align: justify; line-height: 1.5;">Masing-masing Guru melaporkan pelaksanaan tugasnya secara tertulis dan berkala kepada Kepala Sekolah.</td>
           </tr>
           <tr>
             <td>Keempat</td>
             <td>:</td>
-            <td style="text-align: justify; line-height: 1;">Segala biaya yang timbul akibat pelaksanaan keputusan ini dibebankan pada anggaran yang sesuai.</td>
+            <td style="text-align: justify; line-height: 1.5;">Segala biaya yang timbul akibat pelaksanaan keputusan ini dibebankan pada anggaran yang sesuai.</td>
           </tr>
           <tr>
             <td>Kelima</td>
             <td>:</td>
-            <td style="text-align: justify; line-height: 1;">Apabila terdapat kekeliruan dalam keputusan ini, akan dibetulkan sebagaimana mestinya.</td>
+            <td style="text-align: justify; line-height: 1.5;">Apabila terdapat kekeliruan dalam keputusan ini, akan dibetulkan sebagaimana mestinya.</td>
           </tr>
           <tr>
             <td>Keenam</td>
             <td>:</td>
-            <td style="text-align: justify; line-height: 1;">Keputusan ini berlaku sejak tanggal ditetapkan dengan catatan apabila terdapat kekeliruan dalam keputusan ini akan dibetulkan sebagaimana mestinya.</td>
+            <td style="text-align: justify; line-height: 1.5;">Keputusan ini berlaku sejak tanggal ditetapkan dengan catatan apabila terdapat kekeliruan dalam keputusan ini akan dibetulkan sebagaimana mestinya.</td>
           </tr>
         </table>
         
-        <div class="tempat-tanggal-kanan">
-          <p>Ditetapkan di &nbsp;&nbsp;&nbsp;&nbsp;: ${data.tempat_ttd || 'Rajabasa Baru'}</p>
-          <p>Pada tanggal &nbsp;&nbsp;: ${data.tanggal_surat || '……………………………'}</p>
-        </div>
-        
-        <div class="penandatanganan-kanan">
-          <p style="line-height: 1;">Kepala ${data.nama_sekolah || '...................'}</p>
-          <br><br><br><br><br>
-          <p style="line-height: 1;"><strong><u>${data.nama_kepala_sekolah || '……………………………'}</u></strong></p>
-          <p style="line-height: 1;">NIP. .................................</p>
+        <!-- TANDA TANGAN DI KANAN BAWAH - SURAT RESMI -->
+        <div class="signature-right-container">
+          <div class="tempat-tanggal-kanan" style="width: 100%; display: flex; justify-content: flex-end;">
+            <div style="width: 50%; text-align: left;">
+              <p>Ditetapkan di : ${data.tempat_ttd || 'Rajabasa Baru'}</p>
+              <p>Pada tanggal  : ${data.tanggal_surat || '……………………………'}</p>
+            </div>
+          </div>
+          
+          <div class="penandatanganan-kanan" style="width: 100%; display: flex; justify-content: flex-end;">
+            <div style="width: 50%; text-align: center;">
+              <p class="jabatan">Kepala ${data.nama_sekolah || 'MA. ASH-SHIDIQI RAJABASA BARU'}</p>
+              <br style="line-height: 0.5;">
+              <p class="nama"><strong><u>${data.nama_kepala_sekolah || '……………………………'}</u></strong></p>
+              <p class="nip">${data.nip_kepala_sekolah || 'NIP. .................................'}</p>
+            </div>
+          </div>
         </div>
       `,
       
       lembar2: `
         <div class="letterhead">
           <div class="logo-placeholder">
-            ${logoDataUrl ? `<img src="${logoDataUrl}" alt="Logo">` : '<i class="fas fa-school"></i>'}
+            ${logoDataUrl ? `<img src="${logoDataUrl}" alt="Logo MA Ash-Shidiqi">` : '<i class="fas fa-school"></i>'}
           </div>
           <div class="letterhead-text">
-            <p style="font-size: 12pt; margin: 0;">${data.yayasan ? data.yayasan.toUpperCase() : 'YAYASAN PENDIDIKAN'}</p>
-            <p style="font-size: 13pt; margin: 0;">KECAMATAN ${data.kecamatan ? data.kecamatan.toUpperCase() : 'KECAMATAN'}</p>
-            <p style="font-size: 14pt; margin: 0;">${data.nama_sekolah ? data.nama_sekolah.toUpperCase() : 'SEKOLAH DASAR'}</p>
-            <p style="font-size: 8pt; margin-top: 5px;">Jl. Raya Lintas Timur No. 03, Kecamatan ${data.kecamatan || '...................'}, Kabupaten ${data.kabupaten || '...................'}</p>
+            <p class="yayasan">${data.yayasan ? data.yayasan.toUpperCase() : 'YAYASAN ASH SHIDIQI MATARAM BARU'}</p>
+            <p class="sekolah"><strong>${data.nama_sekolah ? data.nama_sekolah.toUpperCase() : 'MA. ASH-SHIDIQI RAJABASA BARU'}</strong></p>
+            <p class="alamat">
+              Alamat : ${data.alamat_lengkap || 'Sri Rejo Agung, Rajabasa Baru, Kecamatan Mataram Baru, Kabupaten Lampung Timur 34199'}
+            </p>
           </div>
         </div>
         
-        <div class="center" style="margin-bottom: 20px;">
+        <div class="lampiran-header">
           <h3 class="u">LAMPIRAN I</h3>
-          <p class="nomor-surat" style="font-size: 12pt; text-align: center; margin-top: 0; line-height: 1;">Nomor: ${data.nomor_surat || '……………………………'}</p>
-          <p style="font-size: 12pt; text-align: center; margin-top: 5px; line-height: 1;">TENTANG</p>
-		    <br>
-          <p class="u" style="font-size: 14pt; margin-top: 10px; line-height: 1;">PEMBAGIAN TUGAS GURU DAN TENAGA KEPENDIDIKAN</p>
-          <p style="font-size: 12pt; margin-top: 5px; line-height: 1;">TAHUN PELAJARAN ${data.tahun_pelajaran || '20…./20….'}</p>
+          <p style="font-size: 12pt; margin-top: 5px;">Nomor: ${data.nomor_surat || '……………………………'}</p>
+          <p style="font-size: 12pt; margin-top: 5px;">Tanggal: ${data.tanggal_surat || '……………………………'}</p>
+        </div>
+        
+        <div class="center" style="margin-bottom: 20px;">
+          <p class="u" style="font-size: 14pt; margin-top: 10px; line-height: 1.5;">PEMBAGIAN TUGAS GURU DAN TENAGA KEPENDIDIKAN</p>
+          <p style="font-size: 12pt; margin-top: 5px; line-height: 1.5;">TAHUN PELAJARAN ${data.tahun_pelajaran || '20…./20….'}</p>
         </div>
         
         <table class="dengan-garis">
@@ -1068,39 +1291,49 @@ const templates = {
           </tbody>
         </table>
         
-        <div class="tempat-tanggal-kanan">
-          <p>Ditetapkan di &nbsp;&nbsp;&nbsp;&nbsp;: ${data.tempat_ttd || 'Rajabasa Baru'}</p>
-          <p>Pada tanggal &nbsp;&nbsp;: ${data.tanggal_surat || '……………………………'}</p>
-        </div>
-        
-        <div class="penandatanganan-kanan">
-          <p style="line-height: 1;">Kepala ${data.nama_sekolah || '...................'}</p>
-          <br><br><br><br><br>
-          <p style="line-height: 1;"><strong><u>${data.nama_kepala_sekolah || '……………………………'}</u></strong></p>
-          <p style="line-height: 1;">NIP. .................................</p>
+        <!-- TANDA TANGAN DI KANAN BAWAH - SURAT RESMI -->
+        <div class="signature-right-container">
+          <div class="tempat-tanggal-kanan" style="width: 100%; display: flex; justify-content: flex-end;">
+            <div style="width: 50%; text-align: left;">
+              <p>Ditetapkan di : ${data.tempat_ttd || 'Rajabasa Baru'}</p>
+              <p>Pada tanggal  : ${data.tanggal_surat || '……………………………'}</p>
+            </div>
+          </div>
+          
+          <div class="penandatanganan-kanan" style="width: 100%; display: flex; justify-content: flex-end;">
+            <div style="width: 50%; text-align: center;">
+              <p class="jabatan">Kepala ${data.nama_sekolah || 'MA. ASH-SHIDIQI RAJABASA BARU'}</p>
+              <br style="line-height: 0.5;">
+              <p class="nama"><strong><u>${data.nama_kepala_sekolah || '……………………………'}</u></strong></p>
+              <p class="nip">${data.nip_kepala_sekolah || 'NIP. .................................'}</p>
+            </div>
+          </div>
         </div>
       `,
       
       lembar3: `
         <div class="letterhead">
           <div class="logo-placeholder">
-            ${logoDataUrl ? `<img src="${logoDataUrl}" alt="Logo">` : '<i class="fas fa-school"></i>'}
+            ${logoDataUrl ? `<img src="${logoDataUrl}" alt="Logo MA Ash-Shidiqi">` : '<i class="fas fa-school"></i>'}
           </div>
           <div class="letterhead-text">
-            <p style="font-size: 12pt; margin: 0;">${data.yayasan ? data.yayasan.toUpperCase() : 'YAYASAN PENDIDIKAN'}</p>
-            <p style="font-size: 13pt; margin: 0;">KECAMATAN ${data.kecamatan ? data.kecamatan.toUpperCase() : 'KECAMATAN'}</p>
-            <p style="font-size: 14pt; margin: 0;">${data.nama_sekolah ? data.nama_sekolah.toUpperCase() : 'SEKOLAH DASAR'}</p>
-            <p style="font-size: 8pt; margin-top: 5px;">Jl. Raya Lintas Timur No. 03, Kecamatan ${data.kecamatan || '...................'}, Kabupaten ${data.kabupaten || '...................'}</p>
+            <p class="yayasan">${data.yayasan ? data.yayasan.toUpperCase() : 'YAYASAN ASH SHIDIQI MATARAM BARU'}</p>
+            <p class="sekolah"><strong>${data.nama_sekolah ? data.nama_sekolah.toUpperCase() : 'MA. ASH-SHIDIQI RAJABASA BARU'}</strong></p>
+            <p class="alamat">
+              Alamat : ${data.alamat_lengkap || 'Sri Rejo Agung, Rajabasa Baru, Kecamatan Mataram Baru, Kabupaten Lampung Timur 34199'}
+            </p>
           </div>
         </div>
         
-        <div class="center" style="margin-bottom: 20px;">
+        <div class="lampiran-header">
           <h3 class="u">LAMPIRAN II</h3>
-          <p class="nomor-surat" style="font-size: 12pt; text-align: center; margin-top: 0; line-height: 1;">Nomor: ${data.nomor_surat || '……………………………'}</p>
-          <p style="font-size: 12pt; text-align: center; margin-top: 5px; line-height: 1;">TENTANG</p>
-		    <br>
-          <p class="u" style="font-size: 14pt; margin-top: 10px; line-height: 1;">PEMBAGIAN TUGAS TAMBAHAN GURU</p>
-          <p style="font-size: 12pt; margin-top: 5px; line-height: 1;">TAHUN PELAJARAN ${data.tahun_pelajaran || '20…./20….'}</p>
+          <p style="font-size: 12pt; margin-top: 5px;">Nomor: ${data.nomor_surat || '……………………………'}</p>
+          <p style="font-size: 12pt; margin-top: 5px;">Tanggal: ${data.tanggal_surat || '……………………………'}</p>
+        </div>
+        
+        <div class="center" style="margin-bottom: 20px;">
+          <p class="u" style="font-size: 14pt; margin-top: 10px; line-height: 1.5;">PEMBAGIAN TUGAS TAMBAHAN GURU</p>
+          <p style="font-size: 12pt; margin-top: 5px; line-height: 1.5;">TAHUN PELAJARAN ${data.tahun_pelajaran || '20…./20….'}</p>
         </div>
         
         <div style="margin: 30px 0;">
@@ -1163,16 +1396,23 @@ const templates = {
           </table>
         </div>
         
-        <div class="tempat-tanggal-kanan">
-          <p>Ditetapkan di &nbsp;&nbsp;&nbsp;&nbsp;: ${data.tempat_ttd || 'Rajabasa Baru'}</p>
-          <p>Pada tanggal &nbsp;&nbsp;: ${data.tanggal_surat || '……………………………'}</p>
-        </div>
-        
-        <div class="penandatanganan-kanan">
-          <p style="line-height: 1;">Kepala ${data.nama_sekolah || '...................'}</p>
-          <br><br><br><br><br>
-          <p style="line-height: 1;"><strong><u>${data.nama_kepala_sekolah || '……………………………'}</u></strong></p>
-          <p style="line-height: 1;">NIP. .................................</p>
+        <!-- TANDA TANGAN DI KANAN BAWAH - SURAT RESMI -->
+        <div class="signature-right-container">
+          <div class="tempat-tanggal-kanan" style="width: 100%; display: flex; justify-content: flex-end;">
+            <div style="width: 50%; text-align: left;">
+              <p>Ditetapkan di : ${data.tempat_ttd || 'Rajabasa Baru'}</p>
+              <p>Pada tanggal  : ${data.tanggal_surat || '……………………………'}</p>
+            </div>
+          </div>
+          
+          <div class="penandatanganan-kanan" style="width: 100%; display: flex; justify-content: flex-end;">
+            <div style="width: 50%; text-align: center;">
+              <p class="jabatan">Kepala ${data.nama_sekolah || 'MA. ASH-SHIDIQI RAJABASA BARU'}</p>
+              <br style="line-height: 0.5;">
+              <p class="nama"><strong><u>${data.nama_kepala_sekolah || '……………………………'}</u></strong></p>
+              <p class="nip">${data.nip_kepala_sekolah || 'NIP. .................................'}</p>
+            </div>
+          </div>
         </div>
       `
     };
@@ -1180,31 +1420,32 @@ const templates = {
   
   sk_panitia: data => {
     const pengawasData = data.pengawasData || [];
+    const anggotaArray = data.anggota_panitia ? data.anggota_panitia.split(',').map(a => a.trim()).filter(a => a) : [];
     
     return {
       lembar1: `
         <div class="letterhead">
           <div class="logo-placeholder">
-            ${logoDataUrl ? `<img src="${logoDataUrl}" alt="Logo">` : '<i class="fas fa-school"></i>'}
+            ${logoDataUrl ? `<img src="${logoDataUrl}" alt="Logo MA Ash-Shidiqi">` : '<i class="fas fa-school"></i>'}
           </div>
           <div class="letterhead-text">
-            <p style="font-size: 12pt; margin: 0;">${data.yayasan ? data.yayasan.toUpperCase() : 'YAYASAN PENDIDIKAN'}</p>
-            <p style="font-size: 13pt; margin: 0;">KECAMATAN ${data.kecamatan ? data.kecamatan.toUpperCase() : 'KECAMATAN'}</p>
-            <p style="font-size: 14pt; margin: 0;">${data.nama_sekolah ? data.nama_sekolah.toUpperCase() : 'SEKOLAH DASAR'}</p>
-            <p style="font-size: 8pt; margin-top: 5px;">Jl. Raya Lintas Timur No. 03, Kecamatan ${data.kecamatan || '...................'}, Kabupaten ${data.kabupaten || '...................'}</p>
+            <p class="yayasan">${data.yayasan ? data.yayasan.toUpperCase() : 'YAYASAN ASH SHIDIQI MATARAM BARU'}</p>
+            <p class="sekolah"><strong>${data.nama_sekolah ? data.nama_sekolah.toUpperCase() : 'MA. ASH-SHIDIQI RAJABASA BARU'}</strong></p>
+            <p class="alamat">
+              Alamat : ${data.alamat_lengkap || 'Sri Rejo Agung, Rajabasa Baru, Kecamatan Mataram Baru, Kabupaten Lampung Timur 34199'}
+            </p>
           </div>
         </div>
         
         <div class="center" style="margin-bottom: 20px;">
           <h3 class="u">SURAT KEPUTUSAN</h3>
-          <h3 class="u">KEPALA ${data.nama_sekolah ? data.nama_sekolah.toUpperCase() : 'SEKOLAH'}</h3>
-          <p style="font-size: 12pt; text-align: center; margin-top: 0; line-height: 1;">NOMOR : ${data.nomor_surat_panitia || '……………………………'}</p>
+          <h3 class="u">KEPALA ${data.nama_sekolah ? data.nama_sekolah.toUpperCase() : 'MA. ASH-SHIDIQI RAJABASA BARU'}</h3>
+          <p style="font-size: 12pt; text-align: center; margin-top: 0; line-height: 1.5;">NOMOR : ${data.nomor_surat_panitia || '……………………………'}</p>
         </div>
         
         <div class="center" style="margin-bottom: 30px;">
           <h3 class="u">TENTANG :</h3>
-		    <br>
-          <p style="font-size: 12pt; text-align: center; margin-top: 0; line-height: 1;">
+          <p style="font-size: 12pt; text-align: center; margin-top: 0; line-height: 1.5;">
             PEMBENTUKAN PANITIA PELAKSANA<br>
             ${data.nama_kegiatan ? data.nama_kegiatan.toUpperCase() : 'KEGIATAN SEKOLAH'}<br>
             TAHUN ${data.tahun_kegiatan || '20..'}
@@ -1215,12 +1456,12 @@ const templates = {
           <tr>
             <td>Menimbang</td>
             <td>:</td>
-            <td style="text-align: justify; line-height: 1;">Bahwa dalam rangka pelaksanaan ${data.nama_kegiatan || 'kegiatan sekolah'} di ${data.nama_sekolah || '...................'} perlu dibentuk Panitia Pelaksana.</td>
+            <td style="text-align: justify; line-height: 1.5;">Bahwa dalam rangka pelaksanaan ${data.nama_kegiatan || 'kegiatan sekolah'} di ${data.nama_sekolah || 'MA. ASH-SHIDIQI RAJABASA BARU'} perlu dibentuk Panitia Pelaksana.</td>
           </tr>
           <tr>
             <td>Mengingat</td>
             <td>:</td>
-            <td style="text-align: justify; line-height: 1;">
+            <td style="text-align: justify; line-height: 1.5;">
               <div style="margin-left: 0;">
                 <div>1. Undang-Undang Nomor 20 Tahun 2003 tentang Sistem Pendidikan Nasional</div>
                 <div>2. Peraturan Pemerintah tentang Pengelolaan dan Penyelenggaraan Pendidikan</div>
@@ -1239,93 +1480,160 @@ const templates = {
           <tr>
             <td>Menetapkan</td>
             <td>:</td>
-            <td style="text-align: justify; line-height: 1;">Pembentukan Panitia Pelaksana ${data.nama_kegiatan || 'Kegiatan Sekolah'}</td>
+            <td style="text-align: justify; line-height: 1.5;">Pembentukan Panitia Pelaksana ${data.nama_kegiatan || 'Kegiatan Sekolah'}</td>
           </tr>
           <tr>
             <td>Kesatu</td>
             <td>:</td>
-            <td style="text-align: justify; line-height: 1;">Membentuk Panitia Pelaksana ${data.nama_kegiatan || 'Kegiatan Sekolah'} dengan susunan sebagai berikut:</td>
+            <td style="text-align: justify; line-height: 1.5;">Membentuk Panitia Pelaksana ${data.nama_kegiatan || 'Kegiatan Sekolah'} dengan susunan sebagai berikut:</td>
           </tr>
         </table>
-        
-        <div style="margin: 20px 0 30px 50px;">
-          <table class="tanpa-garis">
-            <tr>
-              <td style="width: 150px; font-weight: bold;">Ketua</td>
-              <td style="width: 10px;">:</td>
-              <td>${data.ketua_panitia || '.................................'}</td>
-            </tr>
-            ${data.wakil_ketua ? `
-            <tr>
-              <td style="font-weight: bold;">Wakil Ketua</td>
-              <td>:</td>
-              <td>${data.wakil_ketua}</td>
-            </tr>
-            ` : ''}
-            <tr>
-              <td style="font-weight: bold;">Sekretaris</td>
-              <td>:</td>
-              <td>${data.sekretaris || '.................................'}</td>
-            </tr>
-            <tr>
-              <td style="font-weight: bold;">Bendahara</td>
-              <td>:</td>
-              <td>${data.bendahara_panitia || '.................................'}</td>
-            </tr>
-          </table>
-        </div>
         
         <table class="tiga-kolom">
           <tr>
             <td>Kedua</td>
             <td>:</td>
-            <td style="text-align: justify; line-height: 1;">Panitia sebagaimana dimaksud dalam diktum Kesatu mempunyai tugas menyusun program kerja, melaksanakan kegiatan, dan membuat laporan pertanggungjawaban.</td>
+            <td style="text-align: justify; line-height: 1.5;">Panitia sebagaimana dimaksud dalam diktum Kesatu mempunyai tugas menyusun program kerja, melaksanakan kegiatan, dan membuat laporan pertanggungjawaban.</td>
           </tr>
           <tr>
             <td>Ketiga</td>
             <td>:</td>
-            <td style="text-align: justify; line-height: 1;">Segala biaya yang timbul akibat pelaksanaan keputusan ini dibebankan pada anggaran yang sesuai.</td>
+            <td style="text-align: justify; line-height: 1.5;">Segala biaya yang timbul akibat pelaksanaan keputusan ini dibebankan pada anggaran yang sesuai.</td>
           </tr>
           <tr>
             <td>Keempat</td>
             <td>:</td>
-            <td style="text-align: justify; line-height: 1;">Keputusan ini berlaku sejak tanggal ditetapkan.</td>
+            <td style="text-align: justify; line-height: 1.5;">Keputusan ini berlaku sejak tanggal ditetapkan.</td>
           </tr>
         </table>
         
-        <div class="tempat-tanggal-kanan">
-          <p>Ditetapkan di &nbsp;&nbsp;&nbsp;&nbsp;: ${data.tempat_ttd || 'Rajabasa Baru'}</p>
-          <p>Pada tanggal &nbsp;&nbsp;: ${data.tanggal_surat_panitia || '……………………………'}</p>
-        </div>
-        
-        <div class="penandatanganan-kanan">
-          <p style="line-height: 1;">Kepala ${data.nama_sekolah || '...................'}</p>
-          <br><br><br><br><br>
-          <p style="line-height: 1;"><strong><u>${data.nama_kepala_sekolah || '……………………………'}</u></strong></p>
-          <p style="line-height: 1;">NIP. .................................</p>
+        <!-- TANDA TANGAN DI KANAN BAWAH - SURAT RESMI -->
+        <div class="signature-right-container">
+          <div class="tempat-tanggal-kanan" style="width: 100%; display: flex; justify-content: flex-end;">
+            <div style="width: 50%; text-align: left;">
+              <p>Ditetapkan di : ${data.tempat_ttd || 'Rajabasa Baru'}</p>
+              <p>Pada tanggal  : ${data.tanggal_surat_panitia || '……………………………'}</p>
+            </div>
+          </div>
+          
+          <div class="penandatanganan-kanan" style="width: 100%; display: flex; justify-content: flex-end;">
+            <div style="width: 50%; text-align: center;">
+              <p class="jabatan">Kepala ${data.nama_sekolah || 'MA. ASH-SHIDIQI RAJABASA BARU'}</p>
+              <br style="line-height: 0.5;">
+              <p class="nama"><strong><u>${data.nama_kepala_sekolah || '……………………………'}</u></strong></p>
+              <p class="nip">${data.nip_kepala_sekolah || 'NIP. .................................'}</p>
+            </div>
+          </div>
         </div>
       `,
       
       lembar2: `
         <div class="letterhead">
           <div class="logo-placeholder">
-            ${logoDataUrl ? `<img src="${logoDataUrl}" alt="Logo">` : '<i class="fas fa-school"></i>'}
+            ${logoDataUrl ? `<img src="${logoDataUrl}" alt="Logo MA Ash-Shidiqi">` : '<i class="fas fa-school"></i>'}
           </div>
           <div class="letterhead-text">
-            <p style="font-size: 12pt; margin: 0;">${data.yayasan ? data.yayasan.toUpperCase() : 'YAYASAN PENDIDIKAN'}</p>
-            <p style="font-size: 13pt; margin: 0;">KECAMATAN ${data.kecamatan ? data.kecamatan.toUpperCase() : 'KECAMATAN'}</p>
-            <p style="font-size: 14pt; margin: 0;">${data.nama_sekolah ? data.nama_sekolah.toUpperCase() : 'SEKOLAH DASAR'}</p>
-            <p style="font-size: 8pt; margin-top: 5px;">Jl. Raya Lintas Timur No. 03, Kecamatan ${data.kecamatan || '...................'}, Kabupaten ${data.kabupaten || '...................'}</p>
+            <p class="yayasan">${data.yayasan ? data.yayasan.toUpperCase() : 'YAYASAN ASH SHIDIQI MATARAM BARU'}</p>
+            <p class="sekolah"><strong>${data.nama_sekolah ? data.nama_sekolah.toUpperCase() : 'MA. ASH-SHIDIQI RAJABASA BARU'}</strong></p>
+            <p class="alamat">
+              Alamat : ${data.alamat_lengkap || 'Sri Rejo Agung, Rajabasa Baru, Kecamatan Mataram Baru, Kabupaten Lampung Timur 34199'}
+            </p>
           </div>
         </div>
         
+        <div class="lampiran-header">
+          <h3 class="u">LAMPIRAN I</h3>
+          <p style="font-size: 12pt; margin-top: 5px;">Nomor: ${data.nomor_surat_panitia || '……………………………'}</p>
+          <p style="font-size: 12pt; margin-top: 5px;">Tanggal: ${data.tanggal_surat_panitia || '……………………………'}</p>
+        </div>
+        
         <div class="center" style="margin-bottom: 20px;">
-          <h3 class="u">LAMPIRAN</h3>
-          <p class="nomor-surat" style="font-size: 12pt; text-align: center; margin-top: 0; line-height: 1;">Nomor: ${data.nomor_surat_panitia || '……………………………'}</p>
-          <p style="font-size: 12pt; text-align: center; margin-top: 5px; line-height: 1;">TENTANG</p>
-		  <br>
-          <p class="u" style="font-size: 14pt; margin-top: 10px; line-height: 1;">DAFTAR PENGAWAS ${data.nama_kegiatan ? data.nama_kegiatan.toUpperCase() : 'KEGIATAN SEKOLAH'}</p>
-          <p style="font-size: 12pt; margin-top: 5px; line-height: 1;">TAHUN ${data.tahun_kegiatan || '20..'}</p>
+          <p class="u" style="font-size: 14pt; margin-top: 10px; line-height: 1.5;">SUSUNAN PANITIA PELAKSANA</p>
+          <p style="font-size: 12pt; margin-top: 5px; line-height: 1.5;">${data.nama_kegiatan ? data.nama_kegiatan.toUpperCase() : 'KEGIATAN SEKOLAH'} TAHUN ${data.tahun_kegiatan || '20..'}</p>
+        </div>
+        
+        <div style="margin: 30px 0;">
+          <table class="tanpa-garis">
+            <tr>
+              <td style="width: 30%; font-weight: bold;">KETUA</td>
+              <td style="width: 5%;">:</td>
+              <td>${data.ketua_panitia || '.................................'}</td>
+            </tr>
+            ${data.wakil_ketua ? `
+            <tr>
+              <td style="font-weight: bold;">WAKIL KETUA</td>
+              <td>:</td>
+              <td>${data.wakil_ketua}</td>
+            </tr>
+            ` : ''}
+            <tr>
+              <td style="font-weight: bold;">SEKRETARIS</td>
+              <td>:</td>
+              <td>${data.sekretaris || '.................................'}</td>
+            </tr>
+            <tr>
+              <td style="font-weight: bold;">BENDAHARA</td>
+              <td>:</td>
+              <td>${data.bendahara_panitia || '.................................'}</td>
+            </tr>
+            <tr>
+              <td style="font-weight: bold; vertical-align: top;">ANGGOTA</td>
+              <td style="vertical-align: top;">:</td>
+              <td>
+                ${anggotaArray.length > 0 ? 
+                  anggotaArray.map((anggota, index) => `
+                    <div>${index + 1}. ${anggota}</div>
+                  `).join('') : 
+                  '<div>-</div>'
+                }
+              </td>
+            </tr>
+          </table>
+        </div>
+        
+        <!-- TANDA TANGAN DI KANAN BAWAH - SURAT RESMI -->
+        <div class="signature-right-container">
+          <div class="tempat-tanggal-kanan" style="width: 100%; display: flex; justify-content: flex-end;">
+            <div style="width: 50%; text-align: left;">
+              <p>Ditetapkan di : ${data.tempat_ttd || 'Rajabasa Baru'}</p>
+              <p>Pada tanggal  : ${data.tanggal_surat_panitia || '……………………………'}</p>
+            </div>
+          </div>
+          
+          <div class="penandatanganan-kanan" style="width: 100%; display: flex; justify-content: flex-end;">
+            <div style="width: 50%; text-align: center;">
+              <p class="jabatan">Kepala ${data.nama_sekolah || 'MA. ASH-SHIDIQI RAJABASA BARU'}</p>
+              <br style="line-height: 0.5;">
+              <p class="nama"><strong><u>${data.nama_kepala_sekolah || '……………………………'}</u></strong></p>
+              <p class="nip">${data.nip_kepala_sekolah || 'NIP. .................................'}</p>
+            </div>
+          </div>
+        </div>
+      `,
+      
+      lembar3: `
+        <div class="letterhead">
+          <div class="logo-placeholder">
+            ${logoDataUrl ? `<img src="${logoDataUrl}" alt="Logo MA Ash-Shidiqi">` : '<i class="fas fa-school"></i>'}
+          </div>
+          <div class="letterhead-text">
+            <p class="yayasan">${data.yayasan ? data.yayasan.toUpperCase() : 'YAYASAN ASH SHIDIQI MATARAM BARU'}</p>
+            <p class="sekolah"><strong>${data.nama_sekolah ? data.nama_sekolah.toUpperCase() : 'MA. ASH-SHIDIQI RAJABASA BARU'}</strong></p>
+            <p class="alamat">
+              Alamat : ${data.alamat_lengkap || 'Sri Rejo Agung, Rajabasa Baru, Kecamatan Mataram Baru, Kabupaten Lampung Timur 34199'}
+            </p>
+          </div>
+        </div>
+        
+        <div class="lampiran-header">
+          <h3 class="u">LAMPIRAN II</h3>
+          <p style="font-size: 12pt; margin-top: 5px;">Nomor: ${data.nomor_surat_panitia || '……………………………'}</p>
+          <p style="font-size: 12pt; margin-top: 5px;">Tanggal: ${data.tanggal_surat_panitia || '……………………………'}</p>
+        </div>
+        
+        <div class="center" style="margin-bottom: 20px;">
+          <p class="u" style="font-size: 14pt; margin-top: 10px; line-height: 1.5;">DAFTAR PENGAWAS</p>
+          <p style="font-size: 12pt; margin-top: 5px; line-height: 1.5;">${data.nama_kegiatan ? data.nama_kegiatan.toUpperCase() : 'KEGIATAN SEKOLAH'} TAHUN ${data.tahun_kegiatan || '20..'}</p>
         </div>
         
         <table class="dengan-garis">
@@ -1350,16 +1658,23 @@ const templates = {
           </tbody>
         </table>
         
-        <div class="tempat-tanggal-kanan">
-          <p>Ditetapkan di &nbsp;&nbsp;&nbsp;&nbsp;: ${data.tempat_ttd || 'Rajabasa Baru'}</p>
-          <p>Pada tanggal &nbsp;&nbsp;: ${data.tanggal_surat_panitia || '……………………………'}</p>
-        </div>
-        
-        <div class="penandatanganan-kanan">
-          <p style="line-height: 1;">Kepala ${data.nama_sekolah || '...................'}</p>
-          <br><br><br><br><br>
-          <p style="line-height: 1;"><strong><u>${data.nama_kepala_sekolah || '……………………………'}</u></strong></p>
-          <p style="line-height: 1;">NIP. .................................</p>
+        <!-- TANDA TANGAN DI KANAN BAWAH - SURAT RESMI -->
+        <div class="signature-right-container">
+          <div class="tempat-tanggal-kanan" style="width: 100%; display: flex; justify-content: flex-end;">
+            <div style="width: 50%; text-align: left;">
+              <p>Ditetapkan di : ${data.tempat_ttd || 'Rajabasa Baru'}</p>
+              <p>Pada tanggal  : ${data.tanggal_surat_panitia || '……………………………'}</p>
+            </div>
+          </div>
+          
+          <div class="penandatanganan-kanan" style="width: 100%; display: flex; justify-content: flex-end;">
+            <div style="width: 50%; text-align: center;">
+              <p class="jabatan">Kepala ${data.nama_sekolah || 'MA. ASH-SHIDIQI RAJABASA BARU'}</p>
+              <br style="line-height: 0.5;">
+              <p class="nama"><strong><u>${data.nama_kepala_sekolah || '……………………………'}</u></strong></p>
+              <p class="nip">${data.nip_kepala_sekolah || 'NIP. .................................'}</p>
+            </div>
+          </div>
         </div>
       `
     };
@@ -1372,43 +1687,43 @@ const templates = {
       lembar1: `
         <div class="letterhead">
           <div class="logo-placeholder">
-            ${logoDataUrl ? `<img src="${logoDataUrl}" alt="Logo">` : '<i class="fas fa-school"></i>'}
+            ${logoDataUrl ? `<img src="${logoDataUrl}" alt="Logo MA Ash-Shidiqi">` : '<i class="fas fa-school"></i>'}
           </div>
           <div class="letterhead-text">
-            <p style="font-size: 12pt; margin: 0;">${data.yayasan ? data.yayasan.toUpperCase() : 'YAYASAN PENDIDIKAN'}</p>
-            <p style="font-size: 13pt; margin: 0;">KECAMATAN ${data.kecamatan ? data.kecamatan.toUpperCase() : 'KECAMATAN'}</p>
-            <p style="font-size: 14pt; margin: 0;">${data.nama_sekolah ? data.nama_sekolah.toUpperCase() : 'SEKOLAH DASAR'}</p>
-            <p style="font-size: 8pt; margin-top: 5px;">Jl. Raya Lintas Timur No. 03, Kecamatan ${data.kecamatan || '...................'}, Kabupaten ${data.kabupaten || '...................'}</p>
+            <p class="yayasan">${data.yayasan ? data.yayasan.toUpperCase() : 'YAYASAN ASH SHIDIQI MATARAM BARU'}</p>
+            <p class="sekolah"><strong>${data.nama_sekolah ? data.nama_sekolah.toUpperCase() : 'MA. ASH-SHIDIQI RAJABASA BARU'}</strong></p>
+            <p class="alamat">
+              Alamat : ${data.alamat_lengkap || 'Sri Rejo Agung, Rajabasa Baru, Kecamatan Mataram Baru, Kabupaten Lampung Timur 34199'}
+            </p>
           </div>
         </div>
         
         <div class="center" style="margin-bottom: 20px;">
           <h3 class="u">SURAT EDARAN</h3>
-          <p style="font-size: 12pt; text-align: center; margin-top: 0; line-height: 1;">NOMOR : ${data.nomor_edaran || '……………………………'}</p>
+          <p style="font-size: 12pt; text-align: center; margin-top: 0; line-height: 1.5;">NOMOR : ${data.nomor_edaran || '……………………………'}</p>
         </div>
         
         <div class="center" style="margin-bottom: 30px;">
           <h3 class="u">TENTANG</h3>
-		    <br>
-          <p class="u" style="font-size: 14pt; margin-top: 10px; line-height: 1;">Pemberitahuan Biaya Sekolah</p>
-          <p style="font-size: 12pt; margin-top: 5px; line-height: 1;">TAHUN PELAJARAN ${data.tahun_pelajaran_edaran || '20…./20….'}</p>
+          <p class="u" style="font-size: 14pt; margin-top: 10px; line-height: 1.5;">Pemberitahuan Biaya Sekolah</p>
+          <p style="font-size: 12pt; margin-top: 5px; line-height: 1.5;">TAHUN PELAJARAN ${data.tahun_pelajaran_edaran || '20…./20….'}</p>
         </div>
         
         <div class="justify" style="margin: 20px 0;">
-          <p style="line-height: 1;">Yth.</p>
-          <p style="line-height: 1;">Bapak/Ibu Orang Tua/Wali Peserta Didik</p>
-          <p style="line-height: 1;">di</p>
-          <p style="line-height: 1;">Tempat</p>
+          <p style="line-height: 1.5;">Yth.</p>
+          <p style="line-height: 1.5;">Bapak/Ibu Orang Tua/Wali Peserta Didik</p>
+          <p style="line-height: 1.5;">di</p>
+          <p style="line-height: 1.5;">Tempat</p>
         </div>
         
         <div class="justify" style="margin: 20px 0;">
-          <p style="line-height: 1;">Assalamu'alaikum Wr. Wb</p>
-          <p style="line-height: 1;">Dengan hormat,</p>
-          <p style="line-height: 1;">Dalam rangka menunjang kelancaran proses pembelajaran dan operasional sekolah pada Tahun Pelajaran ${data.tahun_pelajaran_edaran || '20…./20….'}, bersama ini kami sampaikan pemberitahuan mengenai biaya sekolah yang perlu dipenuhi oleh orang tua/wali peserta didik.</p>
+          <p style="line-height: 1.5;">Assalamu'alaikum Wr. Wb</p>
+          <p style="line-height: 1.5;">Dengan hormat,</p>
+          <p style="line-height: 1.5;">Dalam rangka menunjang kelancaran proses pembelajaran dan operasional sekolah pada Tahun Pelajaran ${data.tahun_pelajaran_edaran || '20…./20….'}, bersama ini kami sampaikan pemberitahuan mengenai biaya sekolah yang perlu dipenuhi oleh orang tua/wali peserta didik.</p>
         </div>
         
         <div class="justify" style="margin: 20px 0;">
-          <p style="line-height: 1;">Adapun rincian biaya sekolah dimaksud meliputi:</p>
+          <p style="line-height: 1.5;">Adapun rincian biaya sekolah dimaksud meliputi:</p>
           <table class="dengan-garis">
             <thead>
               <tr>
@@ -1431,34 +1746,111 @@ const templates = {
                   </tr>
                 `).join('') : 
                 `<tr><td colspan="5" style="text-align: center;">Belum ada data biaya</td></tr>`
-              }
+            }
             </tbody>
           </table>
         </div>
         
         <div class="justify" style="margin: 20px 0;">
-          <p style="line-height: 1;">Pembayaran biaya sekolah tersebut dapat dilakukan mulai tanggal ${data.tanggal_mulai_pembayaran || '…………………'} sampai dengan ${data.tanggal_akhir_pembayaran || '…………………'} melalui ${data.metode_pembayaran || '…………………'} (bendahara sekolah/transfer rekening sekolah). Langsung ke bendahara Sekolah</p>
+          <p style="line-height: 1.5;">Pembayaran biaya sekolah tersebut dapat dilakukan mulai tanggal ${data.tanggal_mulai_pembayaran || '…………………'} sampai dengan ${data.tanggal_akhir_pembayaran || '…………………'} melalui ${data.metode_pembayaran || '…………………'} (bendahara sekolah/transfer rekening sekolah). Langsung ke bendahara Sekolah</p>
         </div>
         
         <div class="justify" style="margin: 20px 0;">
-          <p style="line-height: 1;">Kami berharap Bapak/Ibu dapat bekerja sama untuk memenuhi kewajiban ini tepat waktu demi kelancaran kegiatan belajar mengajar dan peningkatan mutu layanan pendidikan di sekolah kami.</p>
+          <p style="line-height: 1.5;">Kami berharap Bapak/Ibu dapat bekerja sama untuk memenuhi kewajiban ini tepat waktu demi kelancaran kegiatan belajar mengajar dan peningkatan mutu layanan pendidikan di sekolah kami.</p>
         </div>
         
         <div class="justify" style="margin: 20px 0;">
-          <p style="line-height: 1;">Demikian surat edaran ini kami sampaikan. Atas perhatian dan kerja sama Bapak/Ibu, kami ucapkan terima kasih.</p>
-          <p style="line-height: 1;">Wasalamu'alaikum wr.wb</p>
+          <p style="line-height: 1.5;">Demikian surat edaran ini kami sampaikan. Atas perhatian dan kerja sama Bapak/Ibu, kami ucapkan terima kasih.</p>
+          <p style="line-height: 1.5;">Wasalamu'alaikum wr.wb</p>
         </div>
         
-        <div class="tempat-tanggal-kanan">
-          <p>Ditetapkan di &nbsp;&nbsp;&nbsp;&nbsp;: ${data.tempat_ttd || 'Rajabasa Baru'}</p>
-          <p>Pada tanggal &nbsp;&nbsp;: ${data.tanggal_edaran || '……………………………'}</p>
+        <!-- TANDA TANGAN DI KANAN BAWAH - SURAT RESMI -->
+        <div class="signature-right-container">
+          <div class="tempat-tanggal-kanan" style="width: 100%; display: flex; justify-content: flex-end;">
+            <div style="width: 50%; text-align: left;">
+              <p>Ditetapkan di : ${data.tempat_ttd || 'Rajabasa Baru'}</p>
+              <p>Pada tanggal  : ${data.tanggal_edaran || '……………………………'}</p>
+            </div>
+          </div>
+          
+          <div class="penandatanganan-kanan" style="width: 100%; display: flex; justify-content: flex-end;">
+            <div style="width: 50%; text-align: center;">
+              <p class="jabatan">Kepala Sekolah</p>
+              <br style="line-height: 0.5;">
+              <p class="nama"><strong><u>${data.nama_kepala_sekolah || '……………………………'}</u></strong></p>
+              <p class="nip">${data.nip_kepala_sekolah || 'NIP. .................................'}</p>
+            </div>
+          </div>
+        </div>
+      `
+    };
+  },
+  
+  surat_pemanggilan: data => {
+    return {
+      lembar1: `
+        <div class="letterhead">
+          <div class="logo-placeholder">
+            ${logoDataUrl ? `<img src="${logoDataUrl}" alt="Logo MA Ash-Shidiqi">` : '<i class="fas fa-school"></i>'}
+          </div>
+          <div class="letterhead-text">
+            <p class="yayasan">${data.yayasan ? data.yayasan.toUpperCase() : 'YAYASAN ASH SHIDIQI MATARAM BARU'}</p>
+            <p class="sekolah"><strong>${data.nama_sekolah ? data.nama_sekolah.toUpperCase() : 'MA. ASH-SHIDIQI RAJABASA BARU'}</strong></p>
+            <p class="alamat">
+              Alamat : ${data.alamat_lengkap || 'Sri Rejo Agung, Rajabasa Baru, Kecamatan Mataram Baru, Kabupaten Lampung Timur 34199'}
+            </p>
+          </div>
         </div>
         
-        <div class="penandatanganan-kanan">
-          <p style="line-height: 1;">Kepala Sekolah</p>
-          <br><br><br><br><br>
-          <p style="line-height: 1;"><strong><u>(………………………………………)</u></strong></p>
-          <p style="line-height: 1;">NIP. ……………………………</p>
+        <div class="center" style="margin-bottom: 20px;">
+          <h3 class="u">SURAT PEMANGGILAN</h3>
+          <p style="font-size: 12pt; text-align: center; margin-top: 0; line-height: 1.5;">NOMOR : ${data.nomor_pemanggilan || '……………………………'}</p>
+          <p style="font-size: 12pt; text-align: center; margin-top: 5px; line-height: 1.5;">LAMPIRAN : -</p>
+          <p style="font-size: 12pt; text-align: center; margin-top: 5px; line-height: 1.5;">PERIHAL : Pemanggilan Orang Tua/Wali Siswa</p>
+        </div>
+        
+        <div class="justify" style="margin: 20px 0;">
+          <p style="line-height: 1.5;">Kepada Yth.</p>
+          <p style="line-height: 1.5;">Bapak/Ibu Orang Tua/Wali</p>
+          <p style="line-height: 1.5;">dari Ananda <strong>${data.nama_siswa || '……………………………'}</strong></p>
+          <p style="line-height: 1.5;">Kelas <strong>${data.kelas_siswa || '……………………………'}</strong></p>
+          <p style="line-height: 1.5;">di</p>
+          <p style="line-height: 1.5;">&nbsp;&nbsp;&nbsp;&nbsp;Tempat</p>
+        </div>
+        
+        <div class="justify" style="margin: 20px 0;">
+          <p style="line-height: 1.5;">Assalamu'alaikum Wr. Wb</p>
+          <p style="line-height: 1.5;">Dengan hormat,</p>
+          <p style="line-height: 1.5;">Puji syukur ke hadirat Allah SWT atas limpahan rahmat dan karunia-Nya. Semoga Bapak/Ibu senantiasa berada dalam keadaan sehat wal afiat.</p>
+          <p style="line-height: 1.5;">Sehubungan dengan hasil pengamatan pihak sekolah terhadap perkembangan akademik, kehadiran, serta sikap dan perilaku Ananda <strong>${data.nama_siswa || '……………………………'}</strong> selama mengikuti kegiatan pembelajaran di sekolah, maka kami memandang perlu adanya komunikasi dan kerja sama yang lebih intensif antara pihak sekolah dengan orang tua/wali siswa.</p>
+          <p style="line-height: 1.5;">Oleh karena itu, kami mengundang Bapak/Ibu Orang Tua/Wali untuk dapat hadir ke sekolah guna membahas beberapa hal yang berkaitan dengan perkembangan Ananda, serta untuk mencari solusi terbaik demi kemajuan dan kebaikan Ananda di masa yang akan datang.</p>
+          <p style="line-height: 1.5;">Adapun pelaksanaan pertemuan tersebut akan dilaksanakan pada:</p>
+          <p style="line-height: 1.5;">Hari/Tanggal &nbsp;&nbsp;&nbsp;&nbsp;: <strong>${data.hari_tanggal || '……………………………'}</strong></p>
+          <p style="line-height: 1.5;">Waktu &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <strong>${data.waktu_pertemuan || '……………………………'}</strong></p>
+          <p style="line-height: 1.5;">Tempat &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <strong>${data.tempat_pertemuan || '……………………………'}</strong></p>
+          <p style="line-height: 1.5;">Agenda &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <strong>${data.agenda || '……………………………'}</strong></p>
+          <p style="line-height: 1.5;">Kami sangat mengharapkan kehadiran Bapak/Ibu tepat pada waktu yang telah ditentukan. Apabila berhalangan hadir, mohon kiranya dapat mengonfirmasi kepada pihak sekolah terlebih dahulu.</p>
+          <p style="line-height: 1.5;">Demikian surat pemanggilan ini kami sampaikan. Atas perhatian, dukungan, dan kerja sama Bapak/Ibu Orang Tua/Wali, kami ucapkan terima kasih.</p>
+          <p style="line-height: 1.5;">Hormat kami,</p>
+          
+          <!-- TANDA TANGAN DI KANAN BAWAH - SURAT RESMI -->
+          <div class="signature-right-container">
+            <div class="tempat-tanggal-kanan" style="width: 100%; display: flex; justify-content: flex-end;">
+              <div style="width: 50%; text-align: left;">
+                <p>Ditetapkan di : ${data.tempat_ttd || 'Rajabasa Baru'}</p>
+                <p>Pada tanggal  : ${data.tanggal_pemanggilan || '……………………………'}</p>
+              </div>
+            </div>
+            
+            <div class="penandatanganan-kanan" style="width: 100%; display: flex; justify-content: flex-end;">
+              <div style="width: 50%; text-align: center;">
+                <p class="jabatan">Kepala Sekolah</p>
+                <br style="line-height: 0.5;">
+                <p class="nama"><strong><u>${data.nama_kepala_sekolah || '……………………………'}</u></strong></p>
+                <p class="nip">${data.nip_kepala_sekolah || 'NIP. .................................'}</p>
+              </div>
+            </div>
+          </div>
         </div>
       `
     };
@@ -1472,9 +1864,12 @@ function getAllData() {
   // Data Identitas Sekolah
   data.nama_sekolah = document.getElementById('nama_sekolah').value;
   data.kecamatan = document.getElementById('kecamatan').value;
+  data.kabupaten = document.getElementById('kabupaten').value;
   data.yayasan = document.getElementById('yayasan').value;
+  data.alamat_lengkap = document.getElementById('alamat_lengkap')?.value || 'Sri Rejo Agung, Rajabasa Baru, Kecamatan Mataram Baru, Kabupaten Lampung Timur 34199';
   data.nama_kepala_sekolah = document.getElementById('nama_kepala_sekolah').value;
   data.tempat_ttd = document.getElementById('tempat_ttd').value;
+  data.nip_kepala_sekolah = document.getElementById('nip_kepala_sekolah')?.value || 'NIP. .................................';
   
   // Data berdasarkan jenis surat
   if (currentJenisSurat === 'sk_keputusan') {
@@ -1506,6 +1901,7 @@ function getAllData() {
     data.wakil_ketua = document.getElementById('wakil_ketua')?.value || '';
     data.sekretaris = document.getElementById('sekretaris')?.value || '';
     data.bendahara_panitia = document.getElementById('bendahara_panitia')?.value || '';
+    data.anggota_panitia = document.getElementById('anggota_panitia')?.value || '';
     
     // Data Pengawas untuk Lampiran
     data.pengawasData = pengawasData;
@@ -1519,6 +1915,15 @@ function getAllData() {
     
     // Data Biaya untuk surat edaran
     data.biayaData = biayaData;
+  } else if (currentJenisSurat === 'surat_pemanggilan') {
+    data.nomor_pemanggilan = document.getElementById('nomor_pemanggilan')?.value || '';
+    data.tanggal_pemanggilan = document.getElementById('tanggal_pemanggilan')?.value || '';
+    data.nama_siswa = document.getElementById('nama_siswa')?.value || '';
+    data.kelas_siswa = document.getElementById('kelas_siswa')?.value || '';
+    data.hari_tanggal = document.getElementById('hari_tanggal')?.value || '';
+    data.waktu_pertemuan = document.getElementById('waktu_pertemuan')?.value || '';
+    data.tempat_pertemuan = document.getElementById('tempat_pertemuan')?.value || '';
+    data.agenda = document.getElementById('agenda')?.value || '';
   }
   
   data.logoDataUrl = logoDataUrl;
@@ -1542,16 +1947,34 @@ function renderForm() {
   if (currentJenisSurat === 'sk_keputusan') {
     if (guruData.length === 0) {
       addGuruRow();
+    } else {
+      guruData.forEach((guru, index) => {
+        addGuruRow(index);
+      });
     }
   } else if (currentJenisSurat === 'sk_panitia') {
     if (pengawasData.length === 0) {
       addPengawasRow();
+    } else {
+      pengawasData.forEach((pengawas, index) => {
+        addPengawasRow(index);
+      });
     }
+    updateSusunanPanitiaPreview();
   } else if (currentJenisSurat === 'surat_edaran') {
     if (biayaData.length === 0) {
       addBiayaRow();
+    } else {
+      biayaData.forEach((biaya, index) => {
+        addBiayaRow(index);
+      });
     }
   }
+  
+  // Format tanggal setelah form dirender
+  setTimeout(() => {
+    formatDateInputs();
+  }, 50);
 }
 
 function updatePreview() {
@@ -1561,50 +1984,57 @@ function updatePreview() {
   
   if (!template) return;
   
-  const previews = template(data);
-  
-  if (currentJenisSurat === 'sk_keputusan') {
-    // Untuk SK Keputusan, tampilkan 3 lembar
-    previewContainer.innerHTML = `
-      <div id="preview1" class="preview">
-        <div class="paper" id="paperContent1">
-          ${previews.lembar1}
+  try {
+    const previews = template(data);
+    
+    if (currentJenisSurat === 'sk_keputusan') {
+      previewContainer.innerHTML = `
+        <div id="preview1" class="preview">
+          <div class="paper" id="paperContent1">
+            ${previews.lembar1}
+          </div>
         </div>
-      </div>
-      <div id="preview2" class="preview">
-        <div class="paper" id="paperContent2">
-          ${previews.lembar2}
+        <div id="preview2" class="preview">
+          <div class="paper" id="paperContent2">
+            ${previews.lembar2}
+          </div>
         </div>
-      </div>
-      <div id="preview3" class="preview">
-        <div class="paper" id="paperContent3">
-          ${previews.lembar3}
+        <div id="preview3" class="preview">
+          <div class="paper" id="paperContent3">
+            ${previews.lembar3}
+          </div>
         </div>
-      </div>
-    `;
-  } else if (currentJenisSurat === 'sk_panitia') {
-    // Untuk SK Panitia, tampilkan 2 lembar
-    previewContainer.innerHTML = `
-      <div id="preview1" class="preview">
-        <div class="paper" id="paperContent1">
-          ${previews.lembar1}
+      `;
+    } else if (currentJenisSurat === 'sk_panitia') {
+      previewContainer.innerHTML = `
+        <div id="preview1" class="preview">
+          <div class="paper" id="paperContent1">
+            ${previews.lembar1}
+          </div>
         </div>
-      </div>
-      <div id="preview2" class="preview">
-        <div class="paper" id="paperContent2">
-          ${previews.lembar2}
+        <div id="preview2" class="preview">
+          <div class="paper" id="paperContent2">
+            ${previews.lembar2}
+          </div>
         </div>
-      </div>
-    `;
-  } else if (currentJenisSurat === 'surat_edaran') {
-    // Untuk Surat Edaran, tampilkan 1 lembar
-    previewContainer.innerHTML = `
-      <div id="preview1" class="preview">
-        <div class="paper" id="paperContent1">
-          ${previews.lembar1}
+        <div id="preview3" class="preview">
+          <div class="paper" id="paperContent3">
+            ${previews.lembar3}
+          </div>
         </div>
-      </div>
-    `;
+      `;
+    } else if (currentJenisSurat === 'surat_edaran' || currentJenisSurat === 'surat_pemanggilan') {
+      previewContainer.innerHTML = `
+        <div id="preview1" class="preview">
+          <div class="paper" id="paperContent1">
+            ${previews.lembar1}
+          </div>
+        </div>
+      `;
+    }
+  } catch (error) {
+    console.error('Error updating preview:', error);
+    previewContainer.innerHTML = '<div style="color: red; padding: 20px;">Terjadi kesalahan saat memperbarui preview.</div>';
   }
 }
 
@@ -1630,10 +2060,10 @@ function addGuruRow(index = null) {
   
   const rowHtml = `
     <div class="dynamic-row" id="guruRow${rowId}">
-      <input type="text" placeholder="Nama Guru" id="guruNama${rowId}" oninput="updateGuruData(${rowId})">
-      <input type="text" placeholder="Mata Pelajaran" id="guruMapel${rowId}" oninput="updateGuruData(${rowId})">
-      <input type="text" placeholder="Kelas" id="guruKelas${rowId}" oninput="updateGuruData(${rowId})">
-      <input type="text" placeholder="JTM" id="guruJtm${rowId}" oninput="updateGuruData(${rowId})">
+      <input type="text" placeholder="Nama Guru" id="guruNama${rowId}" value="${guruData[rowId]?.nama || ''}" oninput="updateGuruData(${rowId})">
+      <input type="text" placeholder="Mata Pelajaran" id="guruMapel${rowId}" value="${guruData[rowId]?.mapel || ''}" oninput="updateGuruData(${rowId})">
+      <input type="text" placeholder="Kelas" id="guruKelas${rowId}" value="${guruData[rowId]?.kelas || ''}" oninput="updateGuruData(${rowId})">
+      <input type="text" placeholder="JTM" id="guruJtm${rowId}" value="${guruData[rowId]?.jtm || ''}" oninput="updateGuruData(${rowId})">
       <button type="button" class="remove-row-btn" onclick="removeGuruRow(${rowId})">
         <i class="fas fa-times"></i>
       </button>
@@ -1650,17 +2080,21 @@ function addGuruRow(index = null) {
     guruData.push({ nama: '', mapel: '', kelas: '', jtm: '' });
   }
   
-  debounceUpdate();
+  updatePreview();
 }
 
 function updateGuruData(index) {
+  if (index >= guruData.length) {
+    guruData[index] = {};
+  }
+  
   guruData[index] = {
     nama: document.getElementById(`guruNama${index}`)?.value || '',
     mapel: document.getElementById(`guruMapel${index}`)?.value || '',
     kelas: document.getElementById(`guruKelas${index}`)?.value || '',
     jtm: document.getElementById(`guruJtm${index}`)?.value || ''
   };
-  debounceUpdate();
+  updatePreview();
 }
 
 function removeGuruRow(index) {
@@ -1669,17 +2103,20 @@ function removeGuruRow(index) {
     row.remove();
     guruData.splice(index, 1);
     
+    const container = document.getElementById('guruTableContainer');
+    if (container) {
+      container.innerHTML = '';
+    }
+    
     guruData.forEach((guru, i) => {
-      if (i >= index) {
-        addGuruRow(i);
-      }
+      addGuruRow(i);
     });
     
     if (guruData.length === 0) {
       addGuruRow();
     }
   }
-  debounceUpdate();
+  updatePreview();
 }
 
 // Fungsi-fungsi untuk SK Panitia
@@ -1693,8 +2130,8 @@ function addPengawasRow(index = null) {
   
   const rowHtml = `
     <div class="dynamic-row" id="pengawasRow${rowId}">
-      <input type="text" placeholder="Nama Guru" id="pengawasNama${rowId}" oninput="updatePengawasData(${rowId})">
-      <input type="text" placeholder="Jabatan" id="pengawasJabatan${rowId}" oninput="updatePengawasData(${rowId})">
+      <input type="text" placeholder="Nama Guru" id="pengawasNama${rowId}" value="${pengawasData[rowId]?.nama || ''}" oninput="updatePengawasData(${rowId})">
+      <input type="text" placeholder="Jabatan" id="pengawasJabatan${rowId}" value="${pengawasData[rowId]?.jabatan || ''}" oninput="updatePengawasData(${rowId})">
       <button type="button" class="remove-row-btn" onclick="removePengawasRow(${rowId})">
         <i class="fas fa-times"></i>
       </button>
@@ -1711,15 +2148,19 @@ function addPengawasRow(index = null) {
     pengawasData.push({ nama: '', jabatan: '' });
   }
   
-  debounceUpdate();
+  updatePreview();
 }
 
 function updatePengawasData(index) {
+  if (index >= pengawasData.length) {
+    pengawasData[index] = {};
+  }
+  
   pengawasData[index] = {
     nama: document.getElementById(`pengawasNama${index}`)?.value || '',
     jabatan: document.getElementById(`pengawasJabatan${index}`)?.value || ''
   };
-  debounceUpdate();
+  updatePreview();
 }
 
 function removePengawasRow(index) {
@@ -1728,17 +2169,20 @@ function removePengawasRow(index) {
     row.remove();
     pengawasData.splice(index, 1);
     
+    const container = document.getElementById('pengawasTableContainer');
+    if (container) {
+      container.innerHTML = '';
+    }
+    
     pengawasData.forEach((pengawas, i) => {
-      if (i >= index) {
-        addPengawasRow(i);
-      }
+      addPengawasRow(i);
     });
     
     if (pengawasData.length === 0) {
       addPengawasRow();
     }
   }
-  debounceUpdate();
+  updatePreview();
 }
 
 // Fungsi-fungsi untuk Surat Edaran
@@ -1752,10 +2196,10 @@ function addBiayaRow(index = null) {
   
   const rowHtml = `
     <div class="dynamic-row" id="biayaRow${rowId}">
-      <input type="text" placeholder="Rincian Biaya" id="biayaRincian${rowId}" oninput="updateBiayaData(${rowId})">
-      <input type="text" placeholder="Kelas X" id="biayaKelasX${rowId}" oninput="updateBiayaData(${rowId})">
-      <input type="text" placeholder="Kelas XI" id="biayaKelasXI${rowId}" oninput="updateBiayaData(${rowId})">
-      <input type="text" placeholder="Kelas XII" id="biayaKelasXII${rowId}" oninput="updateBiayaData(${rowId})">
+      <input type="text" placeholder="Rincian Biaya" id="biayaRincian${rowId}" value="${biayaData[rowId]?.rincian || ''}" oninput="updateBiayaData(${rowId})">
+      <input type="text" placeholder="Kelas X" id="biayaKelasX${rowId}" value="${biayaData[rowId]?.kelas_x || ''}" oninput="updateBiayaData(${rowId})">
+      <input type="text" placeholder="Kelas XI" id="biayaKelasXI${rowId}" value="${biayaData[rowId]?.kelas_xi || ''}" oninput="updateBiayaData(${rowId})">
+      <input type="text" placeholder="Kelas XII" id="biayaKelasXII${rowId}" value="${biayaData[rowId]?.kelas_xii || ''}" oninput="updateBiayaData(${rowId})">
       <button type="button" class="remove-row-btn" onclick="removeBiayaRow(${rowId})">
         <i class="fas fa-times"></i>
       </button>
@@ -1772,17 +2216,21 @@ function addBiayaRow(index = null) {
     biayaData.push({ rincian: '', kelas_x: '', kelas_xi: '', kelas_xii: '' });
   }
   
-  debounceUpdate();
+  updatePreview();
 }
 
 function updateBiayaData(index) {
+  if (index >= biayaData.length) {
+    biayaData[index] = {};
+  }
+  
   biayaData[index] = {
     rincian: document.getElementById(`biayaRincian${index}`)?.value || '',
     kelas_x: document.getElementById(`biayaKelasX${index}`)?.value || '',
     kelas_xi: document.getElementById(`biayaKelasXI${index}`)?.value || '',
     kelas_xii: document.getElementById(`biayaKelasXII${index}`)?.value || ''
   };
-  debounceUpdate();
+  updatePreview();
 }
 
 function removeBiayaRow(index) {
@@ -1791,17 +2239,20 @@ function removeBiayaRow(index) {
     row.remove();
     biayaData.splice(index, 1);
     
+    const container = document.getElementById('biayaTableContainer');
+    if (container) {
+      container.innerHTML = '';
+    }
+    
     biayaData.forEach((biaya, i) => {
-      if (i >= index) {
-        addBiayaRow(i);
-      }
+      addBiayaRow(i);
     });
     
     if (biayaData.length === 0) {
       addBiayaRow();
     }
   }
-  debounceUpdate();
+  updatePreview();
 }
 
 // Fungsi tab navigation
@@ -1811,8 +2262,15 @@ function showTab(tabNumber) {
   document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
   document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
   
-  document.querySelector(`.tab-button:nth-child(${tabNumber})`).classList.add('active');
-  document.getElementById(`tab${tabNumber}`).classList.add('active');
+  const buttons = document.querySelectorAll('.tab-button');
+  if (buttons.length >= tabNumber) {
+    buttons[tabNumber - 1].classList.add('active');
+  }
+  
+  const tab = document.getElementById(`tab${tabNumber}`);
+  if (tab) {
+    tab.classList.add('active');
+  }
 }
 
 function showTabPanitia(tabNumber) {
@@ -1821,16 +2279,67 @@ function showTabPanitia(tabNumber) {
   document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
   document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
   
-  document.querySelector(`.tab-button:nth-child(${tabNumber})`).classList.add('active');
-  document.getElementById(`tabPanitia${tabNumber}`).classList.add('active');
+  const buttons = document.querySelectorAll('.tab-button');
+  if (buttons.length >= tabNumber) {
+    buttons[tabNumber - 1].classList.add('active');
+  }
+  
+  const tab = document.getElementById(`tabPanitia${tabNumber}`);
+  if (tab) {
+    tab.classList.add('active');
+  }
+}
+
+function updateSusunanPanitiaPreview() {
+  if (currentJenisSurat !== 'sk_panitia') return;
+  
+  try {
+    const ketua = document.getElementById('ketua_panitia')?.value || '-';
+    const wakil = document.getElementById('wakil_ketua')?.value || '-';
+    const sekretaris = document.getElementById('sekretaris')?.value || '-';
+    const bendahara = document.getElementById('bendahara_panitia')?.value || '-';
+    const anggota = document.getElementById('anggota_panitia')?.value || '-';
+    
+    const previewKetua = document.getElementById('previewKetua');
+    const previewWakil = document.getElementById('previewWakil');
+    const previewSekretaris = document.getElementById('previewSekretaris');
+    const previewBendahara = document.getElementById('previewBendahara');
+    const previewAnggota = document.getElementById('previewAnggota');
+    
+    if (previewKetua) previewKetua.textContent = ketua;
+    if (previewWakil) previewWakil.textContent = wakil;
+    if (previewSekretaris) previewSekretaris.textContent = sekretaris;
+    if (previewBendahara) previewBendahara.textContent = bendahara;
+    if (previewAnggota) previewAnggota.textContent = anggota;
+  } catch (error) {
+    console.error('Error updating susunan panitia preview:', error);
+  }
 }
 
 // Fungsi-fungsi umum
-function debounceUpdate() {
-  clearTimeout(debounceTimer);
-  debounceTimer = setTimeout(() => {
-    updatePreview();
-  }, 300);
+function updateAllPreviews() {
+  validateRequiredFields();
+  updatePreview();
+}
+
+function validateRequiredFields() {
+  const requiredFields = ['nama_sekolah', 'kecamatan', 'kabupaten', 'nama_kepala_sekolah', 'tempat_ttd'];
+  const yayasanField = document.getElementById('yayasan');
+  if (yayasanField && !yayasanField.value.trim()) {
+    yayasanField.value = 'YAYASAN ASH SHIDIQI MATARAM BARU';
+  }
+  
+  requiredFields.forEach(fieldId => {
+    const input = document.getElementById(fieldId);
+    if (input) {
+      const formGroup = input.closest('.form-group');
+      if (!input.value.trim()) {
+        if (formGroup) formGroup.classList.add('has-error');
+      } else {
+        if (formGroup) formGroup.classList.remove('has-error');
+      }
+    }
+  });
 }
 
 // Fungsi cetak dengan konfirmasi
@@ -1841,7 +2350,6 @@ function printDocument() {
     return;
   }
   
-  // Cek apakah ada data kosong
   let isEmpty = false;
   if (currentJenisSurat === 'sk_keputusan') {
     if (!document.getElementById('nomor_surat')?.value || 
@@ -1865,6 +2373,17 @@ function printDocument() {
         !document.getElementById('metode_pembayaran')?.value) {
       isEmpty = true;
     }
+  } else if (currentJenisSurat === 'surat_pemanggilan') {
+    if (!document.getElementById('nomor_pemanggilan')?.value || 
+        !document.getElementById('tanggal_pemanggilan')?.value ||
+        !document.getElementById('nama_siswa')?.value ||
+        !document.getElementById('kelas_siswa')?.value ||
+        !document.getElementById('hari_tanggal')?.value ||
+        !document.getElementById('waktu_pertemuan')?.value ||
+        !document.getElementById('tempat_pertemuan')?.value ||
+        !document.getElementById('agenda')?.value) {
+      isEmpty = true;
+    }
   }
   
   if (isEmpty) {
@@ -1879,7 +2398,7 @@ function hidePrintModal() {
   document.getElementById('printModal').style.display = 'none';
 }
 
-function printAllPreviews() {
+function printAllPreviews(printDirectly = false) {
   hidePrintModal();
   
   const previews = document.querySelectorAll('.preview');
@@ -1889,64 +2408,121 @@ function printAllPreviews() {
     return;
   }
   
-  const pdf = new window.jspdf.jsPDF('p', 'mm', 'a4');
-  
-  // Generate each page
-  previews.forEach((preview, index) => {
-    if (index > 0) {
-      pdf.addPage();
-    }
-    
-    html2canvas(preview, { 
-      scale: 2,
-      useCORS: true,
-      allowTaint: true,
-      backgroundColor: '#fdfdf8'
-    }).then(canvas => {
-      const imgData = canvas.toDataURL('image/jpeg', 1.0);
-      const imgWidth = 210;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      
-      pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight);
-      
-      if (index === previews.length - 1) {
-        const nomorSurat = document.getElementById('nomor_surat')?.value || 
-                          document.getElementById('nomor_surat_panitia')?.value || 
-                          document.getElementById('nomor_edaran')?.value || 
-                          Date.now();
-        const jenisSurat = currentJenisSurat === 'sk_keputusan' ? 'SK_Keputusan' : 
-                         currentJenisSurat === 'sk_panitia' ? 'SK_Panitia' : 'Surat_Edaran';
-        pdf.save(`${jenisSurat}_${nomorSurat.replace(/\//g, '-')}.pdf`);
-        showNotification('Surat berhasil dicetak!');
+  if (printDirectly) {
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write('<html><head><title>Cetak Surat - MA Ash-Shidiqi</title>');
+    printWindow.document.write('<style>');
+    printWindow.document.write(`
+      body { margin: 0; padding: 0; font-family: "Times New Roman", Times, serif; }
+      .preview { 
+        background: #fdfdf8;
+        width: 21.59cm;
+        min-height: 35.56cm;
+        margin: 0 auto;
+        padding: 1.5cm 2.5cm 2cm 2.5cm;
+        page-break-after: always;
+        box-sizing: border-box;
       }
-    }).catch(error => {
-      console.error('Error generating PDF:', error);
-      showNotification('Terjadi kesalahan saat mencetak. Silakan coba lagi.');
+      @media print {
+        .preview { margin: 0; }
+      }
+    `);
+    printWindow.document.write('</style></head><body>');
+    
+    previews.forEach(preview => {
+      printWindow.document.write('<div class="preview">');
+      printWindow.document.write(preview.querySelector('.paper').innerHTML);
+      printWindow.document.write('</div>');
     });
-  });
+    
+    printWindow.document.write('</body></html>');
+    printWindow.document.close();
+    
+    setTimeout(() => {
+      printWindow.print();
+      printWindow.close();
+      showNotification('Mencetak...');
+    }, 500);
+  }
 }
 
 function handleLogoUpload(event) {
   const file = event.target.files[0];
   if (file) {
+    if (file.size > 2 * 1024 * 1024) {
+      showNotification('Ukuran file maksimal 2MB!');
+      return;
+    }
+    
+    if (!file.type.match('image.*')) {
+      showNotification('Hanya file gambar yang diperbolehkan!');
+      return;
+    }
+    
     const reader = new FileReader();
     reader.onload = function(e) {
       logoDataUrl = e.target.result;
       const logoPreview = document.getElementById('logoPreview');
-      logoPreview.innerHTML = `<img src="${logoDataUrl}" alt="Logo">`;
+      if (logoPreview) {
+        logoPreview.innerHTML = `<img src="${logoDataUrl}" alt="Logo MA Ash-Shidiqi" style="width: 100%; height: 100%; object-fit: cover;">`;
+      }
       updatePreview();
+      showNotification('Logo berhasil diupload!');
     };
     reader.readAsDataURL(file);
   }
 }
 
+function removeLogo() {
+  logoDataUrl = null;
+  const logoPreview = document.getElementById('logoPreview');
+  if (logoPreview) {
+    logoPreview.innerHTML = '<i class="fas fa-school" style="color: #999;"></i>';
+  }
+  const logoInput = document.getElementById('logoInput');
+  if (logoInput) {
+    logoInput.value = '';
+  }
+  updatePreview();
+  showNotification('Logo dihapus');
+}
+
 function saveIdentitasSekolah() {
+  const requiredFields = ['nama_sekolah', 'kecamatan', 'kabupaten', 'nama_kepala_sekolah', 'tempat_ttd'];
+  let isValid = true;
+  
+  requiredFields.forEach(fieldId => {
+    const input = document.getElementById(fieldId);
+    if (input) {
+      const formGroup = input.closest('.form-group');
+      if (!input.value.trim()) {
+        if (formGroup) formGroup.classList.add('has-error');
+        isValid = false;
+      } else {
+        if (formGroup) formGroup.classList.remove('has-error');
+      }
+    }
+  });
+  
+  const yayasanInput = document.getElementById('yayasan');
+  if (yayasanInput && !yayasanInput.value.trim()) {
+    yayasanInput.value = 'YAYASAN ASH SHIDIQI MATARAM BARU';
+  }
+  
+  if (!isValid) {
+    showNotification('Harap isi semua field yang wajib diisi!');
+    return;
+  }
+  
   const data = {
     nama_sekolah: document.getElementById('nama_sekolah').value,
     kecamatan: document.getElementById('kecamatan').value,
-    yayasan: document.getElementById('yayasan').value,
+    kabupaten: document.getElementById('kabupaten').value,
+    yayasan: document.getElementById('yayasan').value || 'YAYASAN ASH SHIDIQI MATARAM BARU',
+    alamat_lengkap: document.getElementById('alamat_lengkap')?.value || 'Sri Rejo Agung, Rajabasa Baru, Kecamatan Mataram Baru, Kabupaten Lampung Timur 34199',
     nama_kepala_sekolah: document.getElementById('nama_kepala_sekolah').value,
     tempat_ttd: document.getElementById('tempat_ttd').value,
+    nip_kepala_sekolah: document.getElementById('nip_kepala_sekolah')?.value || '',
     logoDataUrl: logoDataUrl
   };
   
@@ -1957,21 +2533,40 @@ function saveIdentitasSekolah() {
 function loadIdentitasSekolah() {
   const saved = localStorage.getItem(IDENTITAS_KEY);
   if (saved) {
-    const data = JSON.parse(saved);
-    document.getElementById('nama_sekolah').value = data.nama_sekolah || '';
-    document.getElementById('kecamatan').value = data.kecamatan || '';
-    document.getElementById('yayasan').value = data.yayasan || '';
-    document.getElementById('nama_kepala_sekolah').value = data.nama_kepala_sekolah || '';
-    document.getElementById('tempat_ttd').value = data.tempat_ttd || 'Rajabasa Baru';
-    
-    if (data.logoDataUrl) {
-      logoDataUrl = data.logoDataUrl;
-      document.getElementById('logoPreview').innerHTML = `<img src="${logoDataUrl}" alt="Logo">`;
+    try {
+      const data = JSON.parse(saved);
+      document.getElementById('nama_sekolah').value = data.nama_sekolah || 'MA. ASH-SHIDIQI RAJABASA BARU';
+      document.getElementById('kecamatan').value = data.kecamatan || 'MATARAM BARU';
+      document.getElementById('kabupaten').value = data.kabupaten || 'LAMPUNG TIMUR';
+      document.getElementById('yayasan').value = data.yayasan || 'YAYASAN ASH SHIDIQI MATARAM BARU';
+      
+      const alamatLengkap = document.getElementById('alamat_lengkap');
+      if (alamatLengkap) {
+        alamatLengkap.value = data.alamat_lengkap || 'Sri Rejo Agung, Rajabasa Baru, Kecamatan Mataram Baru, Kabupaten Lampung Timur 34199';
+      }
+      
+      document.getElementById('nama_kepala_sekolah').value = data.nama_kepala_sekolah || '';
+      document.getElementById('tempat_ttd').value = data.tempat_ttd || 'Rajabasa Baru';
+      
+      const nipKepsek = document.getElementById('nip_kepala_sekolah');
+      if (nipKepsek) {
+        nipKepsek.value = data.nip_kepala_sekolah || '';
+      }
+      
+      if (data.logoDataUrl) {
+        logoDataUrl = data.logoDataUrl;
+        const logoPreview = document.getElementById('logoPreview');
+        if (logoPreview) {
+          logoPreview.innerHTML = `<img src="${logoDataUrl}" alt="Logo MA Ash-Shidiqi" style="width: 100%; height: 100%; object-fit: cover;">`;
+        }
+      }
+    } catch (e) {
+      console.error('Error loading saved data:', e);
     }
   }
 }
 
-function showNotification(message) {
+function showNotification(message, duration = 3000) {
   const notification = document.createElement('div');
   notification.className = 'notification';
   notification.textContent = message;
@@ -1979,62 +2574,77 @@ function showNotification(message) {
   
   setTimeout(() => {
     notification.remove();
-  }, 3000);
+  }, duration);
+}
+
+// Fungsi untuk format tanggal otomatis
+function formatDateInputs() {
+  const today = new Date();
+  const options = { day: 'numeric', month: 'long', year: 'numeric' };
+  const tanggalDefault = today.toLocaleDateString('id-ID', options);
+  const year = today.getFullYear();
+  
+  document.querySelectorAll('input[id*="tanggal"]').forEach(input => {
+    if (input && !input.value && input.type !== 'hidden' && !input.id.includes('_')) {
+      input.value = tanggalDefault;
+    }
+  });
+  
+  document.querySelectorAll('input[id*="tahun"]').forEach(input => {
+    if (input && !input.value) {
+      if (input.id.includes('pelajaran')) {
+        input.value = `${year}/${year + 1}`;
+      } else if (input.id.includes('kegiatan')) {
+        input.value = year.toString();
+      }
+    }
+  });
 }
 
 // --- INITIALIZATION ---
 document.addEventListener('DOMContentLoaded', function() {
   loadIdentitasSekolah();
   
-  // Set default date untuk form yang aktif
-  const today = new Date();
-  const options = { day: 'numeric', month: 'long', year: 'numeric' };
-  const tanggalDefault = today.toLocaleDateString('id-ID', options);
+  const logoInput = document.getElementById('logoInput');
+  if (logoInput) {
+    logoInput.addEventListener('change', handleLogoUpload);
+  }
   
-  // Inisialisasi form pertama
   renderForm();
   updatePreview();
   
-  // Set tanggal default setelah form dirender
   setTimeout(() => {
-    const tanggalInput = document.getElementById('tanggal_surat');
-    if (tanggalInput && !tanggalInput.value) {
-      tanggalInput.value = tanggalDefault;
-    }
-    
-    const tanggalPanitiaInput = document.getElementById('tanggal_surat_panitia');
-    if (tanggalPanitiaInput && !tanggalPanitiaInput.value) {
-      tanggalPanitiaInput.value = tanggalDefault;
-    }
-    
-    const tanggalEdaranInput = document.getElementById('tanggal_edaran');
-    if (tanggalEdaranInput && !tanggalEdaranInput.value) {
-      tanggalEdaranInput.value = tanggalDefault;
-    }
-    
-    // Set default year untuk SK Keputusan
-    const tahunInput = document.getElementById('tahun_pelajaran');
-    if (tahunInput && !tahunInput.value) {
-      const year = today.getFullYear();
-      tahunInput.value = `${year}/${year + 1}`;
-    }
-    
-    // Set default year untuk SK Panitia
-    const tahunKegiatanInput = document.getElementById('tahun_kegiatan');
-    if (tahunKegiatanInput && !tahunKegiatanInput.value) {
-      tahunKegiatanInput.value = today.getFullYear().toString();
-    }
-    
-    // Set default year untuk Surat Edaran
-    const tahunEdaranInput = document.getElementById('tahun_pelajaran_edaran');
-    if (tahunEdaranInput && !tahunEdaranInput.value) {
-      const year = today.getFullYear();
-      tahunEdaranInput.value = `${year}/${year + 1}`;
-    }
-    
+    formatDateInputs();
+    validateRequiredFields();
     updatePreview();
-  }, 100);
+  }, 200);
 });
+
+// Event listener untuk update susunan panitia preview
+document.addEventListener('input', function(e) {
+  if (e.target && 
+     (e.target.id === 'ketua_panitia' || 
+      e.target.id === 'wakil_ketua' || 
+      e.target.id === 'sekretaris' || 
+      e.target.id === 'bendahara_panitia' ||
+      e.target.id === 'anggota_panitia')) {
+    updateSusunanPanitiaPreview();
+  }
+});
+
+// Event listener untuk validasi real-time
+document.addEventListener('blur', function(e) {
+  if (e.target && e.target.tagName === 'INPUT' && e.target.hasAttribute('required')) {
+    const formGroup = e.target.closest('.form-group');
+    if (formGroup) {
+      if (!e.target.value.trim()) {
+        formGroup.classList.add('has-error');
+      } else {
+        formGroup.classList.remove('has-error');
+      }
+    }
+  }
+}, true);
 </script>
 </body>
 </html>
